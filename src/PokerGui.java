@@ -21,7 +21,7 @@ public class PokerGui extends JFrame {
 
         mainPanel.add(crearVentanaInicial(), "Inicio");
         mainPanel.add(crearMenuPrincipal(), "Menu");
-        mainPanel.add(crearSeleccionModo(), "ModoJuego");
+        mainPanel.add(crearSeleccionModo(), "Modo");
 
         setContentPane(mainPanel);
         setVisible(true);
@@ -32,6 +32,7 @@ public class PokerGui extends JFrame {
     private JPanel crearVentanaInicial() {
         JPanel panel = new JPanel() {
             Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\PortadaPoker.png").getImage();
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -41,7 +42,7 @@ public class PokerGui extends JFrame {
         panel.setLayout(null);
 
         JButton botonIniciar = crearBotonEstilizado("Iniciar");
-        botonIniciar.setBounds(275, 450, 250, 60);
+        botonIniciar.setBounds(725, 750, 350, 60);
         botonIniciar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
@@ -54,6 +55,7 @@ public class PokerGui extends JFrame {
     private JPanel crearMenuPrincipal() {
         JPanel panel = new JPanel() {
             Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoMenu.jpg").getImage();
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -63,28 +65,19 @@ public class PokerGui extends JFrame {
         panel.setLayout(null);
 
         JButton botonJugar = crearBotonEstilizado("Jugar");
-        botonJugar.setBounds(275, 300, 250, 60);
+        botonJugar.setBounds(225, 380, 250, 60);
         botonJugar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
-            cardLayout.show(mainPanel, "ModoJuego");
+            cardLayout.show(mainPanel, "Modo");
         });
 
         JButton botonCreditos = crearBotonEstilizado("Créditos");
-        botonCreditos.setBounds(275, 400, 250, 60);
-        botonCreditos.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
-            mostrarCreditos();
-        });
+        botonCreditos.setBounds(225, 480, 250, 60);
+        botonCreditos.addActionListener(e -> mostrarCreditos());
 
         JButton botonSalir = crearBotonEstilizado("Salir");
-        botonSalir.setBounds(275, 500, 250, 60);
-        botonSalir.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
-            if (musicaFondo != null && musicaFondo.isRunning()) {
-                musicaFondo.stop();
-            }
-            System.exit(0);
-        });
+        botonSalir.setBounds(225, 580, 250, 60);
+        botonSalir.addActionListener(e -> System.exit(0));
 
         panel.add(botonJugar);
         panel.add(botonCreditos);
@@ -94,7 +87,8 @@ public class PokerGui extends JFrame {
 
     private JPanel crearSeleccionModo() {
         JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoModoJuego.jpg").getImage();
+            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoModo.jpg").getImage();
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -103,39 +97,48 @@ public class PokerGui extends JFrame {
         };
         panel.setLayout(null);
 
-        JLabel titulo = new JLabel("Selecciona Modo");
-        titulo.setFont(new Font("Arial", Font.BOLD, 28));
+        JLabel titulo = new JLabel("Selecciona modo");
+        titulo.setFont(new Font("Serif", Font.BOLD, 40));
         titulo.setForeground(Color.WHITE);
-        titulo.setBounds(270, 20, 400, 40);
+        titulo.setBounds(570, 30, 300, 48);
         panel.add(titulo);
 
-        // Botón 1: Texas Hold'em
-        JLabel labelTexas = new JLabel("Poker Texas Hold'em");
-        labelTexas.setFont(new Font("Arial", Font.BOLD, 18));
-        labelTexas.setForeground(Color.WHITE);
-        labelTexas.setBounds(150, 100, 200, 30);
-        panel.add(labelTexas);
+        // Botón Atrás con estilo hover
+        JButton botonAtras = new JButton("Atrás");
+        botonAtras.setFont(new Font("Arial", Font.BOLD, 16));
+        botonAtras.setBounds(30, 30, 100, 40);
+        botonAtras.setBackground(new Color(0, 102, 204));
+        botonAtras.setForeground(Color.WHITE);
+        botonAtras.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        botonAtras.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        JButton botonTexas = crearBotonConImagen("C:\\Users\\V16\\Downloads\\texas.png");
-        botonTexas.setBounds(130, 140, 200, 200);
-        botonTexas.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Seleccionaste Texas Hold'em");
+        Color colorOriginal = new Color(0, 102, 204);
+        Color colorHover = new Color(30, 144, 255);
+
+        botonAtras.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                botonAtras.setBackground(colorHover);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                botonAtras.setBackground(colorOriginal);
+            }
         });
-        panel.add(botonTexas);
 
-        // Botón 2: Five Cards
-        JLabel labelFive = new JLabel("Poker Five Cards");
-        labelFive.setFont(new Font("Arial", Font.BOLD, 18));
-        labelFive.setForeground(Color.WHITE);
-        labelFive.setBounds(480, 100, 200, 30);
-        panel.add(labelFive);
-
-        JButton botonFive = crearBotonConImagen("C:\\Users\\V16\\Downloads\\fivecards.png");
-        botonFive.setBounds(460, 140, 200, 200);
-        botonFive.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this, "Seleccionaste Five Cards");
+        botonAtras.addActionListener(e -> {
+            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            cardLayout.show(mainPanel, "Menu");
         });
-        panel.add(botonFive);
+
+        panel.add(botonAtras);
+
+        JButton boton1 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerTexas1.jpg");
+        boton1.setBounds(400, 240, 200, 200);
+        panel.add(boton1);
+
+        JButton boton2 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerFive.jpg");
+        boton2.setBounds(650, 240, 200, 200);
+        panel.add(boton2);
 
         return panel;
     }
@@ -146,18 +149,17 @@ public class PokerGui extends JFrame {
         boton.setFont(new Font("Arial", Font.BOLD, 18));
         Color colorOriginal = new Color(0, 102, 204);
         Color colorHover = new Color(30, 144, 255);
+
         boton.setBackground(colorOriginal);
         boton.setForeground(Color.WHITE);
         boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         boton.addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseEntered(MouseEvent e) {
                 boton.setBackground(colorHover);
             }
 
-            @Override
             public void mouseExited(MouseEvent e) {
                 boton.setBackground(colorOriginal);
             }
@@ -168,24 +170,51 @@ public class PokerGui extends JFrame {
 
     private JButton crearBotonConImagen(String ruta) {
         ImageIcon icono = new ImageIcon(ruta);
-        Image img = icono.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-        JButton boton = new JButton(new ImageIcon(img));
+        Image imgOriginal = icono.getImage();
+
+        JButton boton = new JButton();
         boton.setFocusPainted(false);
         boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         boton.setContentAreaFilled(false);
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
+        int sizeInicial = 200;
+        boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(sizeInicial, sizeInicial, Image.SCALE_SMOOTH)));
+        boton.setPreferredSize(new Dimension(sizeInicial, sizeInicial));
+
+        final Timer[] timerAmpliar = new Timer[1];
+        final Timer[] timerReducir = new Timer[1];
+        final int[] currentSize = {sizeInicial};
+
         boton.addMouseListener(new MouseAdapter() {
-            @Override
             public void mouseEntered(MouseEvent e) {
+                if (timerReducir[0] != null && timerReducir[0].isRunning()) timerReducir[0].stop();
+
+                timerAmpliar[0] = new Timer(15, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (currentSize[0] < 220) {
+                            currentSize[0]++;
+                            boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(currentSize[0], currentSize[0], Image.SCALE_SMOOTH)));
+                        } else ((Timer) e.getSource()).stop();
+                    }
+                });
+                timerAmpliar[0].start();
                 boton.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
-                boton.setSize(220, 220);
             }
 
-            @Override
             public void mouseExited(MouseEvent e) {
+                if (timerAmpliar[0] != null && timerAmpliar[0].isRunning()) timerAmpliar[0].stop();
+
+                timerReducir[0] = new Timer(15, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        if (currentSize[0] > sizeInicial) {
+                            currentSize[0]--;
+                            boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(currentSize[0], currentSize[0], Image.SCALE_SMOOTH)));
+                        } else ((Timer) e.getSource()).stop();
+                    }
+                });
+                timerReducir[0].start();
                 boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-                boton.setSize(200, 200);
             }
         });
 
@@ -194,7 +223,7 @@ public class PokerGui extends JFrame {
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this,
-                "Desarrollado por:\n- Tu Nombre Aquí\n- Otro Colaborador\n\nGracias por jugar :)",
+                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
                 "Créditos",
                 JOptionPane.INFORMATION_MESSAGE);
     }
