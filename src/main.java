@@ -1,10 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Collection;
 
 public class main {
-    public static void main(String[] args) {
+    public main(String[] args) {
 //        List<Carta> Baraja = new ArrayList();
 //        Carta unaCarta;
 //        int cantidad;
@@ -61,12 +60,16 @@ public class main {
         System.out.println("Jugador 1: " + mano1.mostrar() + " | Valor: " + mano1.getValorMano());
         System.out.println("Jugador 2: " + mano2.mostrar() + " | Valor: " + mano2.getValorMano());
 
-        if (mano2.compareTo(mano2) > 0) {
+        if (mano1.compareTo(mano2) > 0) {
             System.out.println("Gana Jugador 1");
         } else if (mano1.compareTo(mano2) < 0) {
             System.out.println("Gana Jugador 2");
         } else {
             System.out.println("Empate");
         }
+    }
+
+    public static void main(String[] args) {
+        main main = new main(args);
     }
     }
