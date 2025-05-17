@@ -35,7 +35,7 @@ public class Carta implements Comparable<Carta> {
 
     @Override
     public String toString() {
-        return getNombreValor() + " de " + palo.name().toLowerCase();
+        return getNombreValor() + "_" + palo.name().toLowerCase();
     }
 
     //Implementación del método compareTo que es util para ordenar mis cartas.
