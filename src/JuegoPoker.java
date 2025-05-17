@@ -82,7 +82,7 @@ public abstract class JuegoPoker {
         return activos <= 1;
     }
 
-    public int getBote() {
+    public int cantidadApuestaRonda() {
         return cantidadApuestaRonda;
     }
 
