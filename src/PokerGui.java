@@ -22,6 +22,8 @@ public class PokerGui extends JFrame {
         mainPanel.add(crearVentanaInicial(), "Inicio");
         mainPanel.add(crearMenuPrincipal(), "Menu");
         mainPanel.add(crearSeleccionModo(), "Modo");
+        mainPanel.add(crearSeleccionJugadores(), "SeleccionJugadores");
+
 
         setContentPane(mainPanel);
         setVisible(true);
@@ -100,7 +102,7 @@ public class PokerGui extends JFrame {
         JLabel titulo = new JLabel("Selecciona modo");
         titulo.setFont(new Font("Serif", Font.BOLD, 40));
         titulo.setForeground(Color.WHITE);
-        titulo.setBounds(570, 30, 300, 48);
+        titulo.setBounds(900, 30, 300, 48);
         panel.add(titulo);
 
         // Botón Atrás con estilo hover
@@ -133,12 +135,23 @@ public class PokerGui extends JFrame {
         panel.add(botonAtras);
 
         JButton boton1 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerTexas1.jpg");
-        boton1.setBounds(400, 240, 200, 200);
+        boton1.setBounds(750, 340, 200, 200);
         panel.add(boton1);
 
+        boton1.addActionListener(e -> {
+            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            cardLayout.show(mainPanel, "SeleccionJugadores");
+        });
+
+
         JButton boton2 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerFive.jpg");
-        boton2.setBounds(650, 240, 200, 200);
+        boton2.setBounds(1050, 340, 200, 200);
         panel.add(boton2);
+
+        boton2.addActionListener(e -> {
+            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            cardLayout.show(mainPanel, "SeleccionJugadores");
+        });
 
         return panel;
     }
@@ -257,6 +270,75 @@ public class PokerGui extends JFrame {
             e.printStackTrace();
         }
     }
+
+    int cantidadJugadores = 2; // valor inicial
+
+    private JPanel crearSeleccionJugadores() {
+        JPanel panel = new JPanel() {
+            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoJugadores.jpg").getImage();
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        panel.setLayout(null);
+
+        JLabel titulo = new JLabel("Selecciona cantidad de jugadores");
+        titulo.setFont(new Font("Serif", Font.BOLD, 36));
+        titulo.setForeground(Color.WHITE);
+        titulo.setBounds(770, 50, 600, 50);
+        panel.add(titulo);
+
+        JLabel labelJugadores = new JLabel(cantidadJugadores + " Jugadores", SwingConstants.CENTER);
+        labelJugadores.setFont(new Font("Serif", Font.BOLD, 30));
+        labelJugadores.setForeground(Color.WHITE);
+        labelJugadores.setBounds(900, 370, 200, 60);
+        panel.add(labelJugadores);
+
+        JButton botonIzquierda = new JButton("<");
+        botonIzquierda.setFont(new Font("Arial", Font.BOLD, 40));
+        botonIzquierda.setBounds(825, 370, 80, 60);
+        botonIzquierda.addActionListener(e -> {
+            if (cantidadJugadores > 2) {
+                cantidadJugadores--;
+                labelJugadores.setText(cantidadJugadores + " Jugadores");
+                reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            }
+        });
+        panel.add(botonIzquierda);
+
+        JButton botonDerecha = new JButton(">");
+        botonDerecha.setFont(new Font("Arial", Font.BOLD, 40));
+        botonDerecha.setBounds(1100, 370, 80, 60);
+        botonDerecha.addActionListener(e -> {
+            if (cantidadJugadores < 8) {
+                cantidadJugadores++;
+                labelJugadores.setText(cantidadJugadores + " Jugadores");
+                reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            }
+        });
+        panel.add(botonDerecha);
+
+        JButton botonAtras = crearBotonEstilizado("Atrás");
+        botonAtras.setBounds(30, 30, 100, 40);
+        botonAtras.addActionListener(e -> {
+            cardLayout.show(mainPanel, "Modo");
+        });
+        panel.add(botonAtras);
+
+        JButton botonContinuar = crearBotonEstilizado("Continuar");
+        botonContinuar.setBounds(925, 600, 150, 50);
+        botonContinuar.addActionListener(e -> {
+            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+
+            JOptionPane.showMessageDialog(this, "Iniciar juego con " + cantidadJugadores + " jugadores");
+        });
+        panel.add(botonContinuar);
+
+        return panel;
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(PokerGui::new);
