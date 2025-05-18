@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 public class FiveCardDraw extends JuegoPoker {
     private int etapaActual; // 0=reparto, 1=cambio de cartas, 2=apuestas finales
     private int apuestaMinima;
-    private int ante; // apuesta obligatoria inicial
+    private int apuestaInicial;
 
     public FiveCardDraw(int numeroDeJugadores, int dineroInicial, int anteInicial) {
         super(numeroDeJugadores, dineroInicial, new Baraja(), "Five Card Draw");
         this.etapaActual = 0;
-        this.ante = anteInicial;
+        this.apuestaInicial = anteInicial;
         this.apuestaMinima = anteInicial * 2;
     }
 
@@ -20,15 +20,12 @@ public class FiveCardDraw extends JuegoPoker {
     public void iniciarJuego(int numeroDeJugadores) {
         baraja.barajar();
 
-        // Recolectar antes (apuestas obligatorias iniciales)
         for (int i = 0; i < numeroDeJugadores; i++) {
-            apostar(i, ante);
+            apostar(i, apuestaInicial);
         }
 
         repartirCartas();
 
-        // En Five Card Draw, el primer turno es típicamente el jugador
-        // a la izquierda del dealer
         turnoActual = (turnoInicial + 1) % numeroDeJugadores;
     }
 
@@ -66,26 +63,21 @@ public class FiveCardDraw extends JuegoPoker {
             case 1:
                 // Segunda ronda de apuestas
                 etapaActual = 2;
-                // Resetear las apuestas y los turnos para la segunda ronda
                 reiniciarApuestasRonda();
                 break;
 
             case 2:
                 // Revelar y determinar ganador
                 determinarGanador();
-                etapaActual = 3; // Fin del juego
+                etapaActual = 3;
                 break;
         }
     }
 
-    /**
-     * Permite a un jugador cambiar las cartas que desea descartar
-     * @param posicionJugador Posición del jugador
-     * @param posicionesCartas Array con las posiciones de las cartas a cambiar (0-4)
-     */
+
     public void cambiarCartas(int posicionJugador, int[] posicionesCartas) {
         if (etapaActual != 1) {
-            return; // Solo se pueden cambiar cartas en la etapa de cambio
+            return;
         }
 
         Jugador jugador = jugadores.get(posicionJugador);
@@ -96,7 +88,6 @@ public class FiveCardDraw extends JuegoPoker {
         List<Carta> manoActual = jugador.getMano().getCartas();
         List<Carta> nuevaMano = new ArrayList<>(manoActual);
 
-        // Ordenar las posiciones de mayor a menor para evitar cambios en los índices
         Arrays.sort(posicionesCartas);
         for (int i = posicionesCartas.length - 1; i >= 0; i--) {
             if (posicionesCartas[i] >= 0 && posicionesCartas[i] < 5) {
@@ -113,13 +104,11 @@ public class FiveCardDraw extends JuegoPoker {
         // Asignar la nueva mano
         jugador.setMano(new Mano(nuevaMano));
 
-        // Pasar al siguiente jugador
         siguienteTurno();
     }
 
     private void reiniciarApuestasRonda() {
         turnoActual = turnoInicial;
-        // Resetear las apuestas para esta ronda, sin afectar al bote total
     }
 
     @Override
@@ -149,7 +138,7 @@ public class FiveCardDraw extends JuegoPoker {
             }
         }
 
-        // El ganador recibe el bote
+        // El ganador recibe el dinero
         if (ganador != null) {
             ganador.recibir(cantidadApuestaRonda);
             return jugadores.indexOf(ganador);
@@ -170,7 +159,6 @@ public class FiveCardDraw extends JuegoPoker {
         return new Random().nextInt(numeroDeJugadores);
     }
 
-    // Métodos adicionales específicos de Five Card Draw
 
     public int getEtapaActual() {
         return etapaActual;
