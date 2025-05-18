@@ -13,7 +13,7 @@ public class PokerGui extends JFrame {
     public PokerGui() {
         setTitle("Juego con Interfaz");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
+        setSize(1920, 1080);
         setLocationRelativeTo(null);
 
         cardLayout = new CardLayout();
@@ -23,7 +23,7 @@ public class PokerGui extends JFrame {
         mainPanel.add(crearMenuPrincipal(), "Menu");
         mainPanel.add(crearSeleccionModo(), "Modo");
         mainPanel.add(crearSeleccionJugadores(), "SeleccionJugadores");
-
+        mainPanel.add(crearVentanaJuego(), "Juego");
 
         setContentPane(mainPanel);
         setVisible(true);
@@ -105,49 +105,25 @@ public class PokerGui extends JFrame {
         titulo.setBounds(900, 30, 300, 48);
         panel.add(titulo);
 
-        // Botón Atrás con estilo hover
-        JButton botonAtras = new JButton("Atrás");
-        botonAtras.setFont(new Font("Arial", Font.BOLD, 16));
+        JButton botonAtras = crearBotonEstilizado("Atrás");
         botonAtras.setBounds(30, 30, 100, 40);
-        botonAtras.setBackground(new Color(0, 102, 204));
-        botonAtras.setForeground(Color.WHITE);
-        botonAtras.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
-        botonAtras.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        Color colorOriginal = new Color(0, 102, 204);
-        Color colorHover = new Color(30, 144, 255);
-
-        botonAtras.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                botonAtras.setBackground(colorHover);
-            }
-
-            public void mouseExited(MouseEvent e) {
-                botonAtras.setBackground(colorOriginal);
-            }
-        });
-
         botonAtras.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
         });
-
         panel.add(botonAtras);
 
         JButton boton1 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerTexas1.jpg");
         boton1.setBounds(750, 340, 200, 200);
         panel.add(boton1);
-
         boton1.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "SeleccionJugadores");
         });
 
-
         JButton boton2 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerFive.jpg");
         boton2.setBounds(1050, 340, 200, 200);
         panel.add(boton2);
-
         boton2.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "SeleccionJugadores");
@@ -156,122 +132,7 @@ public class PokerGui extends JFrame {
         return panel;
     }
 
-    private JButton crearBotonEstilizado(String texto) {
-        JButton boton = new JButton(texto);
-        boton.setFocusPainted(false);
-        boton.setFont(new Font("Arial", Font.BOLD, 18));
-        Color colorOriginal = new Color(0, 102, 204);
-        Color colorHover = new Color(30, 144, 255);
-
-        boton.setBackground(colorOriginal);
-        boton.setForeground(Color.WHITE);
-        boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        boton.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                boton.setBackground(colorHover);
-            }
-
-            public void mouseExited(MouseEvent e) {
-                boton.setBackground(colorOriginal);
-            }
-        });
-
-        return boton;
-    }
-
-    private JButton crearBotonConImagen(String ruta) {
-        ImageIcon icono = new ImageIcon(ruta);
-        Image imgOriginal = icono.getImage();
-
-        JButton boton = new JButton();
-        boton.setFocusPainted(false);
-        boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-        boton.setContentAreaFilled(false);
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        int sizeInicial = 200;
-        boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(sizeInicial, sizeInicial, Image.SCALE_SMOOTH)));
-        boton.setPreferredSize(new Dimension(sizeInicial, sizeInicial));
-
-        final Timer[] timerAmpliar = new Timer[1];
-        final Timer[] timerReducir = new Timer[1];
-        final int[] currentSize = {sizeInicial};
-
-        boton.addMouseListener(new MouseAdapter() {
-            public void mouseEntered(MouseEvent e) {
-                if (timerReducir[0] != null && timerReducir[0].isRunning()) timerReducir[0].stop();
-
-                timerAmpliar[0] = new Timer(15, new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        if (currentSize[0] < 220) {
-                            currentSize[0]++;
-                            boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(currentSize[0], currentSize[0], Image.SCALE_SMOOTH)));
-                        } else ((Timer) e.getSource()).stop();
-                    }
-                });
-                timerAmpliar[0].start();
-                boton.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
-            }
-
-            public void mouseExited(MouseEvent e) {
-                if (timerAmpliar[0] != null && timerAmpliar[0].isRunning()) timerAmpliar[0].stop();
-
-                timerReducir[0] = new Timer(15, new ActionListener() {
-                    public void actionPerformed(ActionEvent e) {
-                        if (currentSize[0] > sizeInicial) {
-                            currentSize[0]--;
-                            boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(currentSize[0], currentSize[0], Image.SCALE_SMOOTH)));
-                        } else ((Timer) e.getSource()).stop();
-                    }
-                });
-                timerReducir[0].start();
-                boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
-            }
-        });
-
-        return boton;
-    }
-
-    private void mostrarCreditos() {
-        JOptionPane.showMessageDialog(this,
-                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
-                "Créditos",
-                JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    private void reproducirMusica(String nombreArchivo) {
-        try {
-            File archivo = new File(nombreArchivo);
-            if (archivo.exists()) {
-                musicaFondo = AudioSystem.getClip();
-                musicaFondo.open(AudioSystem.getAudioInputStream(archivo));
-                musicaFondo.loop(Clip.LOOP_CONTINUOUSLY);
-            } else {
-                System.out.println("Archivo de música no encontrado: " + nombreArchivo);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void reproducirSonido(String nombreArchivo) {
-        try {
-            File archivo = new File(nombreArchivo);
-            if (archivo.exists()) {
-                Clip clip = AudioSystem.getClip();
-                clip.open(AudioSystem.getAudioInputStream(archivo));
-                clip.start();
-            } else {
-                System.out.println("Archivo de sonido no encontrado: " + nombreArchivo);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    int cantidadJugadores = 2; // valor inicial
+    int cantidadJugadores = 2;
 
     private JPanel crearSeleccionJugadores() {
         JPanel panel = new JPanel() {
@@ -322,25 +183,121 @@ public class PokerGui extends JFrame {
 
         JButton botonAtras = crearBotonEstilizado("Atrás");
         botonAtras.setBounds(30, 30, 100, 40);
-        botonAtras.addActionListener(e -> {
-            cardLayout.show(mainPanel, "Modo");
-        });
+        botonAtras.addActionListener(e -> cardLayout.show(mainPanel, "Modo"));
         panel.add(botonAtras);
 
         JButton botonContinuar = crearBotonEstilizado("Continuar");
         botonContinuar.setBounds(925, 600, 150, 50);
         botonContinuar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
-
-            JOptionPane.showMessageDialog(this, "Iniciar juego con " + cantidadJugadores + " jugadores");
+            cardLayout.show(mainPanel, "Juego");
         });
         panel.add(botonContinuar);
 
         return panel;
     }
 
+    private JPanel crearVentanaJuego() {
+        JPanel panel = new JPanel() {
+            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\mesa.png").getImage();
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
+        panel.setLayout(null);
+
+        String[] acciones = {"Fold", "Check", "Call", "Raise", "Bet"};
+        int yPos = 950;
+        for (int i = 0; i < acciones.length; i++) {
+            JButton boton = crearBotonEstilizado(acciones[i]);
+            boton.setBounds(650 + (i * 130), yPos, 120, 40);
+            panel.add(boton);
+        }
+
+        return panel;
+    }
+
+    private JButton crearBotonEstilizado(String texto) {
+        JButton boton = new JButton(texto);
+        boton.setFocusPainted(false);
+        boton.setFont(new Font("Arial", Font.BOLD, 18));
+        Color colorOriginal = new Color(0, 102, 204);
+        Color colorHover = new Color(30, 144, 255);
+
+        boton.setBackground(colorOriginal);
+        boton.setForeground(Color.WHITE);
+        boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        boton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) {
+                boton.setBackground(colorHover);
+            }
+
+            public void mouseExited(MouseEvent e) {
+                boton.setBackground(colorOriginal);
+            }
+        });
+
+        return boton;
+    }
+
+    private JButton crearBotonConImagen(String ruta) {
+        ImageIcon icono = new ImageIcon(ruta);
+        Image imgOriginal = icono.getImage();
+
+        JButton boton = new JButton();
+        boton.setFocusPainted(false);
+        boton.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        boton.setContentAreaFilled(false);
+        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+
+        int sizeInicial = 200;
+        boton.setIcon(new ImageIcon(imgOriginal.getScaledInstance(sizeInicial, sizeInicial, Image.SCALE_SMOOTH)));
+        boton.setPreferredSize(new Dimension(sizeInicial, sizeInicial));
+
+        return boton;
+    }
+
+    private void mostrarCreditos() {
+        JOptionPane.showMessageDialog(this,
+                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
+                "Créditos",
+                JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void reproducirMusica(String nombreArchivo) {
+        try {
+            File archivo = new File(nombreArchivo);
+            if (archivo.exists()) {
+                musicaFondo = AudioSystem.getClip();
+                musicaFondo.open(AudioSystem.getAudioInputStream(archivo));
+                musicaFondo.loop(Clip.LOOP_CONTINUOUSLY);
+            } else {
+                System.out.println("Archivo de música no encontrado: " + nombreArchivo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void reproducirSonido(String nombreArchivo) {
+        try {
+            File archivo = new File(nombreArchivo);
+            if (archivo.exists()) {
+                Clip clip = AudioSystem.getClip();
+                clip.open(AudioSystem.getAudioInputStream(archivo));
+                clip.start();
+            } else {
+                System.out.println("Archivo de sonido no encontrado: " + nombreArchivo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(PokerGui::new);
-    }
-}
+    }}
