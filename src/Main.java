@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class main {
-    public main(String[] args) {
+public class Main {
+    public static void main(String[] args) {
 //        List<Carta> Baraja = new ArrayList();
 //        Carta unaCarta;
 //        int cantidad;
@@ -68,8 +68,8 @@ public class main {
             System.out.println("Empate");
         }
     }
-
-    public static void main(String[] args) {
-        main main = new main(args);
-    }
-    }
+//    PokerGui menu = new PokerGui();
+//    menu.setVisible(true);
+//    TableroTexasHoldEm tablero = new TableroTexasHoldEm();
+//    }
+}

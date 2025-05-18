@@ -11,7 +11,7 @@ public class PokerGui extends JFrame {
     Clip musicaFondo;
 
     public PokerGui() {
-        setTitle("Juego con Interfaz");
+        setTitle("CimaLuck");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
         setLocationRelativeTo(null);
@@ -23,7 +23,7 @@ public class PokerGui extends JFrame {
         mainPanel.add(crearMenuPrincipal(), "Menu");
         mainPanel.add(crearSeleccionModo(), "Modo");
         mainPanel.add(crearSeleccionJugadores(), "SeleccionJugadores");
-        mainPanel.add(crearVentanaJuego(), "Juego");
+//        mainPanel.add(crearVentanaJuego(), "Juego");
 
         setContentPane(mainPanel);
         setVisible(true);
@@ -34,7 +34,7 @@ public class PokerGui extends JFrame {
     private JPanel crearVentanaInicial() {
         JPanel panel = new JPanel() {
             Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\PortadaPoker.png").getImage();
-
+            //960 18
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -43,8 +43,9 @@ public class PokerGui extends JFrame {
         };
         panel.setLayout(null);
 
-        JButton botonIniciar = crearBotonEstilizado("Iniciar");
-        botonIniciar.setBounds(725, 750, 350, 60);
+        JButton botonIniciar = crearBotonEstilizado("INICIAR");
+        botonIniciar.setFont(new Font("Impact", Font.BOLD, 58));
+        botonIniciar.setBounds(750, 750, 420, 75);
         botonIniciar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
@@ -237,11 +238,11 @@ public class PokerGui extends JFrame {
             }
 
             public void mouseExited(MouseEvent e) {
-                boton.setBackground(colorOriginal);
             }
         });
 
-        return boton;
+        boton.setBackground(colorOriginal);
+       return boton;
     }
 
     private JButton crearBotonConImagen(String ruta) {
@@ -263,7 +264,7 @@ public class PokerGui extends JFrame {
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this,
-                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
+                "Desarrollado por:\n Juan Orduña \n David Escárcega Schlemmer \n\n Gracias por jugar",
                 "Créditos",
                 JOptionPane.INFORMATION_MESSAGE);
     }
