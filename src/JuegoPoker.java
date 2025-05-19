@@ -9,7 +9,7 @@ public abstract class JuegoPoker {
     protected int turnoInicial;
     protected int cantidadApuestaRonda;
 
-    public JuegoPoker(int numeroDeJugadores, int dineroInicial, Baraja baraja, String Nombre) {
+    public JuegoPoker(int numeroDeJugadores, int dineroInicial, Baraja baraja) {
         this.numeroDeJugadores = numeroDeJugadores;
         this.dineroInicial = dineroInicial;
         this.baraja = baraja;
@@ -18,7 +18,7 @@ public abstract class JuegoPoker {
         this.jugadores = new ArrayList<>();
         this.cantidadApuestaRonda = 0;
         for (int i = 0; i < numeroDeJugadores; i++) {
-            jugadores.add(new Jugador(Nombre, dineroInicial));
+            jugadores.add(new Jugador(("Jugador" + i),dineroInicial));
         }
     }
 

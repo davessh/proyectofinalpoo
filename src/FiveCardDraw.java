@@ -11,7 +11,7 @@ public class FiveCardDraw extends JuegoPoker {
 
     public FiveCardDraw(int numeroDeJugadores, int dineroInicial, int anteInicial) {
         // Se asume que JuegoPoker tiene: numeroDeJugadores, dineroInicial, una Baraja y un nombre.
-        super(numeroDeJugadores, dineroInicial, new Baraja(), "Five Card Draw");
+        super(numeroDeJugadores, dineroInicial, new Baraja());
         this.etapaActual = 0;
         this.apuestaInicial = anteInicial;
         this.apuestaMinima = anteInicial * 2;

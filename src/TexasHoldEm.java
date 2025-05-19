@@ -7,14 +7,19 @@ public class TexasHoldEm extends JuegoPoker {
     private int apuestaMinima;
     private int ciega;
     private int ciegaGrande;
+    private List<Jugador> jugadores;
 
-    public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String nombre) {
-        super(numeroDeJugadores, dineroInicial, new Baraja(), nombre);
+    public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String[] nombresJugadores) {
+        super(numeroDeJugadores, dineroInicial, new Baraja());
         this.cartasComunitarias = new ArrayList<>();
         this.etapaActual = 0;
         this.ciega = ciegaPequena;
         this.ciegaGrande = ciegaPequena * 2;
         this.apuestaMinima = ciegaGrande;
+        jugadores = new ArrayList<>();
+        for (int i = 0; i < numeroDeJugadores; i++) {
+            jugadores.add(new Jugador(nombresJugadores[i], dineroInicial));
+        }
     }
 
     @Override
