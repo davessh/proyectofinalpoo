@@ -43,7 +43,6 @@ public class TableroFiveCardDraw extends JPanel {
         add(lblTitulo);
 
         // Etiqueta de etapa (Reparto inicial, Cambio de cartas, Apuestas finales)
-        lblEtapa = new JLabel("Etapa: " + juego.getNombreEtapa(), SwingConstants.LEFT);
         lblEtapa.setFont(new Font("Serif", Font.BOLD, 28));
         lblEtapa.setForeground(Color.WHITE);
         lblEtapa.setBounds(200, 70, 300, 40);
@@ -219,7 +218,7 @@ public class TableroFiveCardDraw extends JPanel {
         actualizarPantalla();
     }
 
-    
+
     private ImageIcon obtenerImagenCarta(Carta carta) {
         String nombreCarta = carta.getValor() + "_" + carta.getPalo().name().toLowerCase();
         String ruta = "C:\\Users\\V16\\IdeaProjects\\Pokergui\\src\\BARAJA\\" + nombreCarta + ".png";

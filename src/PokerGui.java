@@ -199,8 +199,8 @@ public class PokerGui extends JFrame {
                 mainPanel.add(tableroTexas, "JuegoTexas");
                 cardLayout.show(mainPanel, "JuegoTexas");
             } else if (modoSeleccionado.equals("FiveCardDraw")) {
-                TableroFiveCardDraw tableroFive = new TableroFiveCardDraw(cantidadJugadores);
-                mainPanel.add(tableroFive, "JuegoFive");
+                //TableroFiveCardDraw tableroFive = new TableroFiveCardDraw(cantidadJugadores);
+                //mainPanel.add(tableroFive, "JuegoFive");
                 cardLayout.show(mainPanel, "JuegoFive");
             }
         });

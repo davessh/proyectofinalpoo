@@ -9,22 +9,18 @@ public class TableroTexasHoldEm extends JPanel {
     private int cantidadJugadores;
     private Image backgroundImage;
 
-    // Componentes de la interfaz
     private JLabel lblTitulo, lblEtapa, lblTurno, lblDinero;
     private JPanel panelComunitarios, panelMano;
 
-    // Botones individuales
     private JButton btnFold, btnCall, btnBet, btnRaise, btnCheck;
 
     public TableroTexasHoldEm(int cantidadJugadores) {
         this.cantidadJugadores = cantidadJugadores;
-        // Instanciar la lógica del juego (dinero inicial 1000, ciega pequeña 50)
-        // La lógica se mantiene sin modificaciones.
         juego = new TexasHoldEm(cantidadJugadores, 1000, 50, "Texas Hold'em");
         juego.iniciarJuego(cantidadJugadores);
 
         // Cargar la imagen de fondo. Verifica que el archivo "mesa.png" exista.
-        backgroundImage = new ImageIcon("C:\\Users\\V16\\Downloads\\mesa.png").getImage();
+        backgroundImage = new ImageIcon("src/Imagenes/mesa.png").getImage();
 
         // Se usa layout nulo para poder posicionar cada componente manualmente.
         setLayout(null);
@@ -196,10 +192,9 @@ public class TableroTexasHoldEm extends JPanel {
     private ImageIcon obtenerImagenCarta(Carta carta) {
         String valorStr = String.valueOf(carta.getValor());
         String paloStr = carta.getPalo().name().toLowerCase();
-        String nombreCarta = valorStr + "_" + paloStr;  // Ej: "11_corazones"
+        String nombreCarta = valorStr + "_" + paloStr;
 
-        String ruta = "C:\\Users\\V16\\IdeaProjects\\Pokergui\\src\\BARAJA\\" + nombreCarta + ".png";
-        System.out.println("Buscando imagen: " + ruta);
+        String ruta = "C:\\Users\\GF76\\IdeaProjects\\proyectofinalpoo2\\Baraja\\" + nombreCarta + ".png";
 
         ImageIcon icon = new ImageIcon(ruta);
         if (icon.getIconWidth() == -1) {
