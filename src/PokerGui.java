@@ -11,7 +11,7 @@ public class PokerGui extends JFrame {
     Clip musicaFondo;
 
     public PokerGui() {
-        setTitle("Juego con Interfaz");
+        setTitle("CimaLuck");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
         setLocationRelativeTo(null);
