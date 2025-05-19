@@ -10,22 +10,23 @@ public class TableroTexasHoldEm extends JPanel {
     private Image backgroundImage;
 
     // Componentes de la interfaz
-    private JLabel lblTitulo, lblEtapa, lblTurno;
+    private JLabel lblTitulo, lblEtapa, lblTurno, lblDinero;
     private JPanel panelComunitarios, panelMano;
 
     // Botones individuales
-    private JButton btnFold, btnCall, btnBet, btnRaise, btnNextPhase;
+    private JButton btnFold, btnCall, btnBet, btnRaise, btnCheck;
 
     public TableroTexasHoldEm(int cantidadJugadores) {
         this.cantidadJugadores = cantidadJugadores;
-        // Instanciar la lógica del juego con dinero inicial 1000 y ciega pequeña 50 (ajusta si es necesario)
+        // Instanciar la lógica del juego (dinero inicial 1000, ciega pequeña 50)
+        // La lógica se mantiene sin modificaciones.
         juego = new TexasHoldEm(cantidadJugadores, 1000, 50, "Texas Hold'em");
         juego.iniciarJuego(cantidadJugadores);
 
-        // Cargar la imagen de fondo. Asegúrate de que "fondoMesa.jpg" exista en esa ruta.
+        // Cargar la imagen de fondo. Verifica que el archivo "mesa.png" exista.
         backgroundImage = new ImageIcon("C:\\Users\\V16\\Downloads\\mesa.png").getImage();
 
-        // Usamos layout nulo para posicionar cada componente manualmente
+        // Se usa layout nulo para poder posicionar cada componente manualmente.
         setLayout(null);
         initUI();
         actualizarPantalla();
@@ -53,6 +54,13 @@ public class TableroTexasHoldEm extends JPanel {
         lblTurno.setBounds(680, 70, 300, 40);
         add(lblTurno);
 
+        // Etiqueta para mostrar el dinero actual del jugador a la derecha de los botones
+        lblDinero = new JLabel("Dinero: $" + juego.getJugadorActual().getDinero(), SwingConstants.CENTER);
+        lblDinero.setFont(new Font("Serif", Font.BOLD, 28));
+        lblDinero.setForeground(Color.GREEN);
+        lblDinero.setBounds(1100, 860, 250, 35);
+        add(lblDinero);
+
         // Panel para las cartas comunitarias
         panelComunitarios = new JPanel();
         panelComunitarios.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -70,17 +78,13 @@ public class TableroTexasHoldEm extends JPanel {
         // Botón "Fold"
         btnFold = new JButton("Fold");
         btnFold.setBounds(650, 860, 100, 35);
-        btnFold.addActionListener(e -> {
-            ejecutarAccion("fold");
-        });
+        btnFold.addActionListener(e -> ejecutarAccion("fold"));
         add(btnFold);
 
         // Botón "Call"
         btnCall = new JButton("Call");
         btnCall.setBounds(760, 860, 100, 35);
-        btnCall.addActionListener(e -> {
-            ejecutarAccion("call");
-        });
+        btnCall.addActionListener(e -> ejecutarAccion("call"));
         add(btnCall);
 
         // Botón "Bet"
@@ -111,19 +115,14 @@ public class TableroTexasHoldEm extends JPanel {
         });
         add(btnRaise);
 
-        // Botón "Siguiente Fase"
-        btnNextPhase = new JButton("Siguiente Fase");
-        btnNextPhase.setBounds(490, 860, 150, 35);
-        btnNextPhase.addActionListener(e -> {
-            juego.jugarRonda();
-            actualizarPantalla();
-        });
-        add(btnNextPhase);
+        // Botón "Check" (nuevo)
+        btnCheck = new JButton("Check");
+        btnCheck.setBounds(490, 860, 150, 35);
+        btnCheck.addActionListener(e -> ejecutarAccion("check"));
+        add(btnCheck);
     }
 
-    /**
-     * Ejecuta acciones que no requieren monto: "fold" y "call".
-     */
+    // Ejecuta acciones que no requieren monto: "fold", "call" y ahora "check"
     private void ejecutarAccion(String accion) {
         switch (accion) {
             case "fold":
@@ -134,13 +133,15 @@ public class TableroTexasHoldEm extends JPanel {
                 JOptionPane.showMessageDialog(this, "Jugador " + (juego.getTurnoActual() + 1) + " iguala la apuesta.");
                 juego.igualar(juego.getTurnoActual(), juego.cantidadApuestaRonda());
                 break;
+            case "check":
+                // Acción de check: el jugador pasa sin apostar
+                JOptionPane.showMessageDialog(this, "Jugador " + (juego.getTurnoActual() + 1) + " hace check.");
+                break;
         }
         avanzarTurno();
     }
 
-    /**
-     * Ejecuta acciones que requieren un monto: "bet" y "raise".
-     */
+    // Ejecuta acciones que requieren monto: "bet" y "raise"
     private void ejecutarAccion(String accion, int monto) {
         switch (accion) {
             case "bet":
@@ -155,23 +156,20 @@ public class TableroTexasHoldEm extends JPanel {
         avanzarTurno();
     }
 
-    /**
-     * Avanza el turno en la lógica del juego y actualiza la interfaz.
-     */
+    // Avanza el turno: se llama automáticamente a jugarRonda() para avanzar las etapas
+    // y se actualiza la interfaz.
     private void avanzarTurno() {
         juego.siguienteTurno();
+        // Llamada automática para cambiar de fase si corresponde.
+        juego.jugarRonda();
         actualizarPantalla();
     }
 
-    /**
-     * Actualiza la interfaz gráfica:
-     * - Actualiza las etiquetas de etapa y turno.
-     * - Muestra las cartas comunitarias.
-     * - Muestra las cartas personales del jugador actual.
-     */
+    // Actualiza la interfaz gráfica: las etiquetas (etapa, turno, dinero) y los paneles de cartas.
     private void actualizarPantalla() {
         lblEtapa.setText("Etapa: " + juego.getNombreEtapa());
         lblTurno.setText("Turno: Jugador " + (juego.getTurnoActual() + 1));
+        lblDinero.setText("Dinero: $" + juego.getJugadorActual().getDinero());
 
         // Actualiza el panel de cartas comunitarias.
         panelComunitarios.removeAll();
@@ -196,10 +194,9 @@ public class TableroTexasHoldEm extends JPanel {
 
 
     private ImageIcon obtenerImagenCarta(Carta carta) {
-        // Usamos el valor numérico y el palo para formar el nombre de archivo.
         String valorStr = String.valueOf(carta.getValor());
         String paloStr = carta.getPalo().name().toLowerCase();
-        String nombreCarta = valorStr + "_" + paloStr;   // Ej: "11_corazones"
+        String nombreCarta = valorStr + "_" + paloStr;  // Ej: "11_corazones"
 
         String ruta = "C:\\Users\\V16\\IdeaProjects\\Pokergui\\src\\BARAJA\\" + nombreCarta + ".png";
         System.out.println("Buscando imagen: " + ruta);
@@ -211,7 +208,6 @@ public class TableroTexasHoldEm extends JPanel {
         Image img = icon.getImage().getScaledInstance(60, 90, Image.SCALE_SMOOTH);
         return new ImageIcon(img);
     }
-
 
     @Override
     protected void paintComponent(Graphics g) {
