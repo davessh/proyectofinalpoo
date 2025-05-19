@@ -16,6 +16,7 @@ public class PokerGui extends JFrame {
         setSize(1920, 1080);
         setLocationRelativeTo(null);
 
+
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
 
@@ -23,7 +24,7 @@ public class PokerGui extends JFrame {
         mainPanel.add(crearMenuPrincipal(), "Menu");
         mainPanel.add(crearSeleccionModo(), "Modo");
         mainPanel.add(crearSeleccionJugadores(), "SeleccionJugadores");
-//        mainPanel.add(crearVentanaJuego(), "Juego");
+
 
         setContentPane(mainPanel);
         setVisible(true);
@@ -34,18 +35,18 @@ public class PokerGui extends JFrame {
     private JPanel crearVentanaInicial() {
         JPanel panel = new JPanel() {
             Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\PortadaPoker.png").getImage();
-            //960 18
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
             }
+
         };
         panel.setLayout(null);
 
-        JButton botonIniciar = crearBotonEstilizado("INICIAR");
-        botonIniciar.setFont(new Font("Impact", Font.BOLD, 58));
-        botonIniciar.setBounds(750, 750, 420, 75);
+        JButton botonIniciar = crearBotonEstilizado("Iniciar");
+        botonIniciar.setBounds(725, 750, 350, 60);
         botonIniciar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
@@ -191,34 +192,24 @@ public class PokerGui extends JFrame {
         botonContinuar.setBounds(925, 600, 150, 50);
         botonContinuar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+
+            // Crear la instancia del Tablero para Texas Hold'em pasando la cantidad de jugadores seleccionada
+            TableroTexasHoldEm tableroTexas = new TableroTexasHoldEm(cantidadJugadores);
+
+            // Agregar el panel "Juego" al CardLayout con una etiqueta única
+            mainPanel.add(tableroTexas, "Juego");
+
+            // Muestra el nuevo panel utilizando CardLayout
             cardLayout.show(mainPanel, "Juego");
         });
         panel.add(botonContinuar);
 
-        return panel;
-    }
-
-    private JPanel crearVentanaJuego() {
-        JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\mesa.png").getImage();
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
-            }
-        };
-        panel.setLayout(null);
-
-        String[] acciones = {"Fold", "Check", "Call", "Raise", "Bet"};
-        int yPos = 950;
-        for (int i = 0; i < acciones.length; i++) {
-            JButton boton = crearBotonEstilizado(acciones[i]);
-            boton.setBounds(650 + (i * 130), yPos, 120, 40);
-            panel.add(boton);
-        }
 
         return panel;
     }
+
+
+
 
     private JButton crearBotonEstilizado(String texto) {
         JButton boton = new JButton(texto);
@@ -238,11 +229,11 @@ public class PokerGui extends JFrame {
             }
 
             public void mouseExited(MouseEvent e) {
+                boton.setBackground(colorOriginal);
             }
         });
 
-        boton.setBackground(colorOriginal);
-       return boton;
+        return boton;
     }
 
     private JButton crearBotonConImagen(String ruta) {
@@ -264,7 +255,7 @@ public class PokerGui extends JFrame {
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this,
-                "Desarrollado por:\n Juan Orduña \n David Escárcega Schlemmer \n\n Gracias por jugar",
+                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
                 "Créditos",
                 JOptionPane.INFORMATION_MESSAGE);
     }

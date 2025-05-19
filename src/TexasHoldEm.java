@@ -3,12 +3,12 @@ import java.util.stream.Collectors;
 
 public class TexasHoldEm extends JuegoPoker {
     private List<Carta> cartasComunitarias;
-    private int etapaActual; // 0=preflop, 1=flop, 2=turn, 3=river
+    private int etapaActual; // 0 = Pre-Flop, 1 = Flop, 2 = Turn, 3 = River
     private int apuestaMinima;
     private int ciega;
     private int ciegaGrande;
 
-    public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena,String nombre) {
+    public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String nombre) {
         super(numeroDeJugadores, dineroInicial, new Baraja(), nombre);
         this.cartasComunitarias = new ArrayList<>();
         this.etapaActual = 0;
@@ -22,6 +22,8 @@ public class TexasHoldEm extends JuegoPoker {
         baraja.barajar();
         repartirCartas();
 
+        // El turno inicial ya se definió en el constructor, pero se puede redefinir aquí si se requiere.
+        turnoInicial = determinarTurnoInicial();
         // La small blind
         int posicionCiegaPequena = turnoInicial;
         apostar(posicionCiegaPequena, ciega);
@@ -30,13 +32,13 @@ public class TexasHoldEm extends JuegoPoker {
         int posicionCiegaGrande = (turnoInicial + 1) % numeroDeJugadores;
         apostar(posicionCiegaGrande, ciegaGrande);
 
-        // Primer turno tras las blinds o ciegas
+        // Primer turno tras las blinds
         turnoActual = (posicionCiegaGrande + 1) % numeroDeJugadores;
     }
 
     @Override
     public void repartirCartas() {
-        // Repartir 2 cartas a cada jugador (Las cartas privadas)
+        // Repartir 2 cartas a cada jugador (cartas privadas)
         for (int i = 0; i < 2; i++) {
             for (Jugador jugador : jugadores) {
                 Carta carta = baraja.repartirUna();
@@ -55,114 +57,98 @@ public class TexasHoldEm extends JuegoPoker {
             determinarGanador();
             return;
         }
-
         switch (etapaActual) {
-            case 0: // Pre flop a flop
+            case 0: // Pre-Flop a Flop
                 generarFlop();
                 break;
-            case 1: // flop a turn
+            case 1: // Flop a Turn
                 generarTurn();
                 break;
-            case 2: // turn a river
+            case 2: // Turn a River
                 generarRiver();
                 break;
             case 3: // Determinar ganador
                 determinarGanador();
                 break;
         }
-
         etapaActual++;
-
         if (etapaActual < 4) {
             reiniciarApuestasRonda();
         }
     }
 
     private void generarFlop() {
+        // Quemar la carta superior
         baraja.repartirUna();
-
-        // 3 cartas comunitarias
+        // Repartir 3 cartas comunitarias
         for (int i = 0; i < 3; i++) {
             cartasComunitarias.add(baraja.repartirUna());
         }
     }
 
     private void generarTurn() {
+        // Quemar una carta
         baraja.repartirUna();
-
         cartasComunitarias.add(baraja.repartirUna());
     }
 
     private void generarRiver() {
+        // Quemar una carta
         baraja.repartirUna();
-
-        // muestra la quinta carta comunitaria
+        // Repartir la quinta carta comunitaria
         cartasComunitarias.add(baraja.repartirUna());
     }
 
     private void reiniciarApuestasRonda() {
+        // Para reiniciar las apuestas después de cada ronda, se resetea el turno al inicial
         turnoActual = turnoInicial;
-        // Resetear las apuestas para esta ronda, sin afectar al bonche o bote total
+        // Se puede agregar código para resetear las apuestas de cada jugador sin afectar el bote total
     }
 
     @Override
     public int determinarGanador() {
-        // cuenta cuantos jugadores activos quedan
+        // Se cuenta cuántos jugadores activos quedan
         List<Jugador> jugadoresActivos = jugadores.stream()
                 .filter(Jugador::estaActivo)
                 .collect(Collectors.toList());
 
-        // si solo queda uno, ese es el ganador
+        // Si solo queda uno, ese es el ganador
         if (jugadoresActivos.size() == 1) {
             Jugador ganador = jugadoresActivos.get(0);
             ganador.recibir(cantidadApuestaRonda);
             return jugadores.indexOf(ganador);
         }
 
-        // Evaluar la mejor mano de cada jugador (combinando cartas privadas y comunitarias)
+        // Se evalúa la mejor mano combinando cartas privadas y comunitarias
         Jugador ganador = null;
         Mano mejorMano = null;
 
         for (Jugador jugador : jugadoresActivos) {
-            // Combinar cartas privadas con comunitarias
             List<Carta> todasLasCartas = new ArrayList<>(jugador.getMano().getCartas());
             todasLasCartas.addAll(cartasComunitarias);
 
-            // Encontrar la mejor combinación de 5 cartas
             Mano mejorCombinacion = encontrarMejorCombinacion(todasLasCartas);
-
             if (mejorMano == null || mejorCombinacion.compareTo(mejorMano) > 0) {
                 mejorMano = mejorCombinacion;
                 ganador = jugador;
             }
         }
-
-        // El ganador recibe el bote
         if (ganador != null) {
             ganador.recibir(cantidadApuestaRonda);
             return jugadores.indexOf(ganador);
         }
-
-        return -1; // Empate o error
+        return -1;  // Empate o error
     }
 
     private Mano encontrarMejorCombinacion(List<Carta> cartas) {
-        // Este método debe encontrar la mejor combinación de 5 cartas
-        // entre las 7 disponibles (2 privadas + 5 comunitarias)
-
-        // Generar todas las combinaciones posibles de 5 cartas
         List<List<Carta>> combinaciones = generarCombinaciones(cartas, 5);
-
         Mano mejorMano = null;
-
         for (List<Carta> combinacion : combinaciones) {
             Mano manoActual = new Mano(combinacion);
-
             if (mejorMano == null || manoActual.compareTo(mejorMano) > 0) {
                 mejorMano = manoActual;
             }
         }
-
         return mejorMano;
     }
 
@@ -178,7 +164,6 @@ public class TexasHoldEm extends JuegoPoker {
             resultado.add(new ArrayList<>(actual));
             return;
         }
-
         for (int i = inicio; i < cartas.size(); i++) {
             actual.add(cartas.get(i));
             generarCombinacionesAux(cartas, k, i + 1, actual, resultado);
@@ -193,15 +178,29 @@ public class TexasHoldEm extends JuegoPoker {
             System.out.print(carta + " ");
         }
         System.out.println();
-
         System.out.println("Manos de los jugadores:");
         mostrarManos();
     }
 
     @Override
     public int determinarTurnoInicial() {
-        //cambio de dealer
+        // Cambio de dealer aleatorio
         return new Random().nextInt(numeroDeJugadores);
+    }
+
+    // Métodos públicos para gestionar y consultar el turno actual
+    public int getTurnoActual() {
+        return turnoActual;
+    }
+
+    public void setTurnoActual(int nuevoTurno) {
+        turnoActual = nuevoTurno;
+    }
+
+
+    @Override
+    public Jugador getJugadorActual() {
+        return jugadores.get(turnoActual);
     }
 
     public List<Carta> getCartasComunitarias() {
