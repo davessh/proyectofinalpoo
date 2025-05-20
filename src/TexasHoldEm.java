@@ -163,7 +163,7 @@ public class TexasHoldEm extends JuegoPoker {
             for (Jugador ganador : ganadores) {
                 ganador.recibir(montoPorGanador); // Transfiere el pot dividido
             }
-            pot = 0; // Reinicia el pot después de transferirlo
+            pot = getPot(); // Reinicia el pot después de transferirlo
             return jugadores.indexOf(ganadores.get(0));
         }
 

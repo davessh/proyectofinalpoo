@@ -9,25 +9,33 @@ public class Mano implements Comparable<Mano> {
         Collections.sort(this.cartas);
     }
 
+    /**
+     * Añade una carta a la mano y reordena las cartas
+     */
     public void agregarCarta(Carta carta) {
         cartas.add(carta);
         Collections.sort(cartas);
     }
 
+    /**
+     * Obtiene la lista de cartas de la mano
+     */
     public List<Carta> getCartas() {
         return cartas;
     }
 
+    /**
+     * Muestra las cartas de la mano como cadena de texto separadas por espacios
+     */
     public String mostrar() {
         return cartas.stream()
-                //Se reutiliza toString de Carta
                 .map(Carta::toString)
-                //Se separan con un espacio vacio " "
                 .collect(Collectors.joining(" "));
     }
 
-
-    // Asignar un valor según la jugada
+    /**
+     * Calcula el valor numérico de la mano según su fuerza en poker (1=carta alta, 9=escalera color)
+     */
     public int getValorMano() {
         if (esEscaleraColor()) return 9;
         if (esPoker()) return 8;
@@ -40,42 +48,64 @@ public class Mano implements Comparable<Mano> {
         return 1; // Carta alta
     }
 
+    /**
+     * Compara dos manos por su valor (para ordenación)
+     */
     @Override
     public int compareTo(Mano otra) {
         return Integer.compare(this.getValorMano(), otra.getValorMano());
     }
 
+    /**
+     * Comprueba si la mano contiene exactamente una pareja
+     */
     public boolean esPareja() {
         Map<Integer,Integer> mapaFrecuencias = obtenerFrecuencias();
-        // existe exactamente un valor con frecuencia 2
         return mapaFrecuencias.values().stream().filter(v -> v == 2).count() == 1;
     }
 
+    /**
+     * Comprueba si la mano contiene dos parejas diferentes
+     */
     public boolean esDoblePareja() {
         Map<Integer,Integer> mapaFrecuencias = obtenerFrecuencias();
-        // existen dos valores con freq=2
         return mapaFrecuencias.values().stream().filter(v -> v == 2).count() == 2;
     }
 
+    /**
+     * Comprueba si la mano contiene un trío (3 cartas del mismo valor)
+     */
     public boolean esTrio() {
         Map<Integer,Integer> mapaFrecuencias = obtenerFrecuencias();
         return mapaFrecuencias.values().stream().anyMatch(v -> v == 3);
     }
 
+    /**
+     * Comprueba si la mano contiene un full house (trío + pareja)
+     */
     public boolean esFullHouse() {
         Map<Integer,Integer> mapaFrecuencias = obtenerFrecuencias();
         return mapaFrecuencias.values().stream().anyMatch(v -> v == 3)
                 && mapaFrecuencias.values().stream().anyMatch(v -> v == 2);
     }
 
+    /**
+     * Comprueba si la mano contiene un póker (4 cartas del mismo valor)
+     */
     public boolean esPoker() {
         return obtenerFrecuencias().values().stream().anyMatch(v -> v == 4);
     }
 
+    /**
+     * Comprueba si todas las cartas son del mismo palo (color)
+     */
     private boolean esColor() {
         return cartas.stream().allMatch(c -> c.getPalo() == cartas.getFirst().getPalo());
     }
 
+    /**
+     * Comprueba si las cartas forman una escalera (valores consecutivos)
+     */
     private boolean esEscalera() {
         for (int i = 0; i < cartas.size() - 1; i++) {
             if (cartas.get(i + 1).getValor() - cartas.get(i).getValor() != 1) return false;
@@ -83,10 +113,16 @@ public class Mano implements Comparable<Mano> {
         return true;
     }
 
+    /**
+     * Comprueba si la mano es escalera de color (cartas consecutivas del mismo palo)
+     */
     private boolean esEscaleraColor() {
         return esEscalera() && esColor();
     }
 
+    /**
+     * Genera un mapa con las frecuencias de cada valor de carta en la mano
+     */
     private Map<Integer, Integer> obtenerFrecuencias() {
         Map<Integer, Integer> frecuencia = new HashMap<>();
         for (Carta c : cartas) {
@@ -96,16 +132,11 @@ public class Mano implements Comparable<Mano> {
         return frecuencia;
     }
 
-    private boolean hayRepetido(int cantidad) {
-        for (Carta c : cartas) {
-            long count = cartas.stream().filter(x -> x.getValor() == c.getValor()).count();
-            if (count == cantidad) return true;
-        }
-        return false;
-    }
-
+    /**
+     * Representación completa de la mano: cartas + valor de la jugada
+     */
     @Override
     public String toString() {
-            return "Mano: " + mostrar() + " valor de la mano: " + getValorMano();
-        }
+        return "Mano: " + mostrar() + " valor de la mano: " + getValorMano();
+    }
 }

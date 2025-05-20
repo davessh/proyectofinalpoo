@@ -17,7 +17,7 @@ public class PokerGui extends JFrame {
         setTitle("Juego con Interfaz");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(null );
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -30,12 +30,12 @@ public class PokerGui extends JFrame {
         setContentPane(mainPanel);
         setVisible(true);
 
-        reproducirMusica("C:\\Users\\V16\\Downloads\\CancionCasino.wav");
+        reproducirMusica("CancionCasino.wav");
     }
 
     private JPanel crearVentanaInicial() {
         JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\PortadaPoker.png").getImage();
+            Image fondo = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\src\\Imagenes\\PortadaPoker.png").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -48,7 +48,7 @@ public class PokerGui extends JFrame {
         JButton botonIniciar = crearBotonEstilizado("Iniciar");
         botonIniciar.setBounds(725, 750, 350, 60);
         botonIniciar.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
         });
 
@@ -58,7 +58,7 @@ public class PokerGui extends JFrame {
 
     private JPanel crearMenuPrincipal() {
         JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoMenu.jpg").getImage();
+            Image fondo = new ImageIcon("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\src\\Imagenes\\FondoMenu.jpg").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -71,7 +71,7 @@ public class PokerGui extends JFrame {
         JButton botonJugar = crearBotonEstilizado("Jugar");
         botonJugar.setBounds(225, 380, 250, 60);
         botonJugar.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Modo");
         });
 
@@ -91,7 +91,7 @@ public class PokerGui extends JFrame {
 
     private JPanel crearSeleccionModo() {
         JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoModo.jpg").getImage();
+            Image fondo = new ImageIcon("src/Imagenes/FondoModo.jpg").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -110,35 +110,35 @@ public class PokerGui extends JFrame {
         JButton botonAtras = crearBotonEstilizado("Atrás");
         botonAtras.setBounds(30, 30, 100, 40);
         botonAtras.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             cardLayout.show(mainPanel, "Menu");
         });
         panel.add(botonAtras);
 
-        JButton boton1 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerTexas1.jpg");
+        JButton boton1 = crearBotonConImagen("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\src\\Imagenes\\PokerTexas1.jpg");
         boton1.setBounds(750, 340, 200, 200);
         panel.add(boton1);
         boton1.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("");
             modoSeleccionado = "TexasHoldEm";
             cardLayout.show(mainPanel, "SeleccionJugadores");
         });
 
-        JButton boton2 = crearBotonConImagen("C:\\Users\\V16\\Downloads\\PokerFive.jpg");
+        JButton boton2 = crearBotonConImagen("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\src\\Imagenes\\PokerFive.jpg");
         boton2.setBounds(1050, 340, 200, 200);
         panel.add(boton2);
         boton2.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             modoSeleccionado = "FiveCardDraw";
             cardLayout.show(mainPanel, "SeleccionJugadores");
         });
 
         return panel;
     }
-
+    //Se diseña una interfaz correspondiente a la cantidad de jugadores
     private JPanel crearSeleccionJugadores() {
         JPanel panel = new JPanel() {
-            Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoJugadores.jpg").getImage();
+            Image fondo = new ImageIcon("src/Imagenes/FondoJugadores.jpg").getImage();
 
             @Override
             protected void paintComponent(Graphics g) {
@@ -167,7 +167,7 @@ public class PokerGui extends JFrame {
             if (cantidadJugadores > 2) {
                 cantidadJugadores--;
                 labelJugadores.setText(cantidadJugadores + " Jugadores");
-                reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+                reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             }
         });
         panel.add(botonIzquierda);
@@ -179,7 +179,7 @@ public class PokerGui extends JFrame {
             if (cantidadJugadores < 8) {
                 cantidadJugadores++;
                 labelJugadores.setText(cantidadJugadores + " Jugadores");
-                reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+                reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
             }
         });
         panel.add(botonDerecha);
@@ -192,7 +192,7 @@ public class PokerGui extends JFrame {
         JButton botonContinuar = crearBotonEstilizado("Continuar");
         botonContinuar.setBounds(925, 600, 150, 50);
         botonContinuar.addActionListener(e -> {
-            reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            reproducirSonido("C:\\Users\\Usuario\\IdeaProjects\\proyectofinalpoo2\\SonidoBotton.wav");
 
             if (modoSeleccionado.equals("TexasHoldEm")) {
                 TableroTexasHoldEm tableroTexas = new TableroTexasHoldEm(cantidadJugadores);
@@ -208,7 +208,7 @@ public class PokerGui extends JFrame {
 
         return panel;
     }
-
+    // Crea un botón con color y diseño
     private JButton crearBotonEstilizado(String texto) {
         JButton boton = new JButton(texto);
         boton.setFocusPainted(false);
@@ -233,7 +233,7 @@ public class PokerGui extends JFrame {
 
         return boton;
     }
-
+    // Extrae una imagen por su ruta para sobreponerla a un botón.
     private JButton crearBotonConImagen(String ruta) {
         ImageIcon icono = new ImageIcon(ruta);
         Image imgOriginal = icono.getImage();
@@ -253,11 +253,11 @@ public class PokerGui extends JFrame {
 
     private void mostrarCreditos() {
         JOptionPane.showMessageDialog(this,
-                "Desarrollado por:\n- Juan Orduna\n\n\nGracias por jugar :)",
+                "Desarrollado por:\n- Juan Orduna y David Escárcega\n\nGracias por jugar :)",
                 "Créditos",
                 JOptionPane.INFORMATION_MESSAGE);
     }
-
+   //Abre un archivo de musica y lo reprodue
     private void reproducirMusica(String nombreArchivo) {
         try {
             File archivo = new File(nombreArchivo);
@@ -286,9 +286,5 @@ public class PokerGui extends JFrame {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(PokerGui::new);
     }
 }

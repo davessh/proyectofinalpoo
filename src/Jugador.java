@@ -1,10 +1,7 @@
 import java.util.ArrayList;
 
-/**
- * Clase que representa un jugador de poker
- */
 public class Jugador {
-    private String nombre;
+    private final String nombre;
     private int dinero;
     private Mano mano;
     private boolean activo;
@@ -19,54 +16,102 @@ public class Jugador {
         this.allIn = false;
     }
 
+    /**
+     * Realiza una apuesta, reduciendo el dinero del jugador.
+     * Si la cantidad excede el dinero disponible, hace all-in automáticamente.
+     */
     public void apostar(int cantidad) {
         if (cantidad > dinero) {
             cantidad = dinero;
             allIn = true;
         }
         this.dinero -= cantidad;
-        this.apuestaRonda += cantidad; // Añade esta línea
+        this.apuestaRonda += cantidad;
         if (dinero == 0) {
             allIn = true;
         }
     }
 
+    /**
+     * Añade una cantidad de dinero al jugador (generalmente por ganar una mano)
+     */
     public void recibir(int cantidad) {
         this.dinero += cantidad;
     }
 
+    /**
+     * Marca al jugador como retirado (no participará en la mano actual)
+     */
     public void retirarse() {
         this.activo = false;
     }
 
+    /**
+     * Indica si el jugador está activo (no se ha retirado)
+     */
     public boolean estaActivo() {
         return activo;
     }
 
+    /**
+     * Devuelve el nombre del jugador
+     */
     public String getNombre() {
         return nombre;
     }
 
+    /**
+     * Devuelve la cantidad de dinero disponible del jugador
+     */
     public int getDinero() {
         return dinero;
     }
 
+    /**
+     * Devuelve la mano actual del jugador (objeto Mano)
+     */
     public Mano getMano() {
         return mano;
     }
 
+    /**
+     * Establece la mano del jugador
+     */
     public void setMano(Mano mano) {
         this.mano = mano;
     }
 
+    /**
+     * Indica si el jugador está en estado all-in (sin más dinero para apostar)
+     */
     public boolean isAllIn() {
         return allIn;
     }
 
+    /**
+     * Establece manualmente el estado all-in del jugador
+     */
     public void setAllIn(boolean allIn) {
         this.allIn = allIn;
     }
 
+    /**
+     * Devuelve la cantidad apostada en la ronda actual
+     */
+    public int getApuestaRonda() {
+        return apuestaRonda;
+    }
+
+    /**
+     * Reinicia a cero el contador de apuestas de la ronda actual
+     */
+    public void resetearApuestaRonda() {
+        this.apuestaRonda = 0;
+    }
+
+    /**
+     * Representación textual del jugador: nombre, dinero y estado (all-in/retirado)
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -77,12 +122,5 @@ public class Jugador {
             sb.append(" [RETIRADO]");
         }
         return sb.toString();
-    }
-    public int getApuestaRonda() {
-        return apuestaRonda;
-    }
-
-    public void resetearApuestaRonda() {  // Sin parámetros
-        this.apuestaRonda = 0;
     }
 }

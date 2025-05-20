@@ -40,7 +40,7 @@ public class TableroTexasHoldEm extends JPanel {
 
     private void initUI() {
         lblEtapa = new JLabel("Etapa: " + juego.getNombreEtapa(), SwingConstants.LEFT);
-        lblEtapa.setFont(new Font("Serif", Font.BOLD, 40));
+        lblEtapa.setFont(new Font("Arial", Font.BOLD, 40));
         lblEtapa.setForeground(Color.WHITE);
         lblEtapa.setBounds(1600, 150, 500, 40);
         add(lblEtapa);
@@ -170,7 +170,6 @@ public class TableroTexasHoldEm extends JPanel {
                         "No puedes hacer check, hay una apuesta activa. Debes igualar (Call), subir (Raise) o retirarte (Fold).");
             }
         });
-        add(btnCheck);
 
         lblPot = new JLabel("Pot: $0", SwingConstants.CENTER);
         lblPot.setFont(new Font("Arial", Font.BOLD, 30));
@@ -337,8 +336,7 @@ public class TableroTexasHoldEm extends JPanel {
                 mensaje.append("su mano");
             }
 
-            mensaje.append(" y recibe $").append(potGanado).append("!");
-            mensaje.append("\nDinero actual: $").append(dineroDespues);
+            mensaje.append(" y recibe $").append(juego.getPot()).append("!");
 
             JOptionPane.showMessageDialog(this, mensaje.toString());
 
@@ -357,6 +355,8 @@ public class TableroTexasHoldEm extends JPanel {
             JOptionPane.showMessageDialog(this, "No hay ganador claro. El pot se divide entre los empates.");
         }
     }
+    // Actualiza los indicadores del flujo de juego, como dinero, turno, etapa, etc.
+// Este método se llama cada vez que se realiza una acción que altera estas mismas variables.
     private void actualizarPantalla() {
         Jugador jugadorActual = juego.getJugadorActual();
 
@@ -389,7 +389,7 @@ public class TableroTexasHoldEm extends JPanel {
         // Actualiza el panel de jugadores
         actualizarPanelJugadores();
     }
-
+    // Alterna el boton call entre Call y Check dependiendo el sentido del juego
     private void actualizarBotonCallCheck() {
         Jugador jugadorActual = juego.getJugadorActual();
         int diferencia = juego.getApuestaMaximaActual() - jugadorActual.getApuestaRonda();
