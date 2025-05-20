@@ -8,37 +8,41 @@ public class TexasHoldEm extends JuegoPoker {
     private int ciega;
     private int ciegaGrande;
     private List<Jugador> jugadores;
+    private int dealerIndex;
+    private int smallBlindIndex;
+    private int bigBlindIndex;
+    private boolean ciegasColocadas;
+    private int pot;
+    private boolean apuestaEnRonda;
+    private int apuestaMaximaActual;// Para controlar si ya se pusieron las ciegas
 
     public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String[] nombresJugadores) {
-        super(numeroDeJugadores, dineroInicial, new Baraja());
+        super(numeroDeJugadores, dineroInicial, new Baraja(),nombresJugadores);
         this.cartasComunitarias = new ArrayList<>();
         this.etapaActual = 0;
         this.ciega = ciegaPequena;
         this.ciegaGrande = ciegaPequena * 2;
         this.apuestaMinima = ciegaGrande;
         jugadores = new ArrayList<>();
+        this.pot = 0; // Inicializar el pot en 0
+        this.apuestaEnRonda = false; // Nadie ha apostado al inicio
         for (int i = 0; i < numeroDeJugadores; i++) {
             jugadores.add(new Jugador(nombresJugadores[i], dineroInicial));
         }
+        this.dealerIndex = -1; // Inicialmente no hay dealer
+        this.ciegasColocadas = false;
+        this.apuestaMaximaActual = 0;
     }
 
     @Override
     public void iniciarJuego(int numeroDeJugadores) {
         baraja.barajar();
         repartirCartas();
-
-        // El turno inicial ya se definió en el constructor, pero se puede redefinir aquí si se requiere.
-        turnoInicial = determinarTurnoInicial();
-        // La small blind
-        int posicionCiegaPequena = turnoInicial;
-        apostar(posicionCiegaPequena, ciega);
-
-        // La big blind
-        int posicionCiegaGrande = (turnoInicial + 1) % numeroDeJugadores;
-        apostar(posicionCiegaGrande, ciegaGrande);
-
-        // Primer turno tras las blinds
-        turnoActual = (posicionCiegaGrande + 1) % numeroDeJugadores;
+        pot = 0;
+        designarDealerYCiegas();
+        apuestaEnRonda = true;
+        apuestaMinima = ciegaGrande;
+        apuestaMaximaActual = ciegaGrande;
     }
 
     @Override
@@ -60,6 +64,8 @@ public class TexasHoldEm extends JuegoPoker {
     public void jugarRonda() {
         if (rondaTerminada()) {
             determinarGanador();
+            // Preparar para la siguiente ronda
+            ciegasColocadas = false;
             return;
         }
         switch (etapaActual) {
@@ -105,24 +111,26 @@ public class TexasHoldEm extends JuegoPoker {
     }
 
     private void reiniciarApuestasRonda() {
-        // Para reiniciar las apuestas después de cada ronda, se resetea el turno al inicial
         turnoActual = turnoInicial;
-        // Se puede agregar código para resetear las apuestas de cada jugador sin afectar el bote total
+        apuestaEnRonda = false;
+        apuestaMaximaActual = 0;
+        // Resetear las apuestas de cada jugador para la nueva ronda
+        jugadores.forEach(Jugador::resetearApuestaRonda);
     }
 
     @Override
     public int determinarGanador() {
         // Se cuenta cuántos jugadores activos quedan
-        List<Jugador> jugadoresActivos = jugadores.stream()
-                .filter(Jugador::estaActivo)
-                .collect(Collectors.toList());
+            List<Jugador> jugadoresActivos = jugadores.stream()
+                    .filter(Jugador::estaActivo)
+                    .collect(Collectors.toList());
 
-        // Si solo queda uno, ese es el ganador
-        if (jugadoresActivos.size() == 1) {
-            Jugador ganador = jugadoresActivos.get(0);
-            ganador.recibir(cantidadApuestaRonda);
-            return jugadores.indexOf(ganador);
-        }
+            if (jugadoresActivos.size() == 1) {
+                Jugador ganador = jugadoresActivos.get(0);
+                ganador.recibir(pot); // Entregar el pot al ganador
+                pot = 0; // Resetear el pot
+                return jugadores.indexOf(ganador);
+            }
 
         // Se evalúa la mejor mano combinando cartas privadas y comunitarias
         Jugador ganador = null;
@@ -139,7 +147,8 @@ public class TexasHoldEm extends JuegoPoker {
             }
         }
         if (ganador != null) {
-            ganador.recibir(cantidadApuestaRonda);
+            ganador.recibir(pot);
+            pot = 0;
             return jugadores.indexOf(ganador);
         }
         return -1;  // Empate o error
@@ -225,4 +234,97 @@ public class TexasHoldEm extends JuegoPoker {
             default -> "Fin de juego";
         };
     }
+
+    public void designarDealerYCiegas() {
+        dealerIndex = (dealerIndex + 1) % numeroDeJugadores;
+        smallBlindIndex = (dealerIndex + 1) % numeroDeJugadores;
+        bigBlindIndex = (dealerIndex + 2) % numeroDeJugadores;
+
+        // Small Blind
+        jugadores.get(smallBlindIndex).apostar(ciega);
+        pot += ciega;
+
+        // Big Blind
+        jugadores.get(bigBlindIndex).apostar(ciegaGrande);
+        pot += ciegaGrande;
+
+        turnoActual = (bigBlindIndex + 1) % numeroDeJugadores;
+    }
+
+    public Jugador getDealer() {
+        return dealerIndex >= 0 ? jugadores.get(dealerIndex) : null;
+    }
+
+    public Jugador getSmallBlind() {
+        return jugadores.get(smallBlindIndex);
+    }
+
+    public Jugador getBigBlind() {
+        return jugadores.get(bigBlindIndex);
+    }
+
+    public int getDealerIndex() {
+        return dealerIndex;
+    }
+
+    public int getSmallBlindIndex() {
+        return smallBlindIndex;
+    }
+
+    public int getBigBlindIndex() {
+        return bigBlindIndex;
+    }
+
+    public int getCiega(){
+        return ciega;
+    }
+
+    public int getCiegaGrande(){
+        return ciegaGrande;
+    }
+
+    public void agregarAlPot(int cantidad) {
+        pot += cantidad;
+    }
+
+    public int getPot() {
+        return pot;
+    }
+
+    public boolean isApuestaEnRonda() {
+        return apuestaEnRonda;
+    }
+
+    public void setApuestaEnRonda(boolean apuestaEnRonda) {
+        this.apuestaEnRonda = apuestaEnRonda;
+    }
+
+    public int getApuestaMaximaActual() {
+        return apuestaMaximaActual;
+    }
+
+    public void setApuestaMaximaActual(int cantidad) {
+        if (cantidad > apuestaMaximaActual) {
+            apuestaMaximaActual = cantidad;
+        }
+    }
+
+    public void igualarApuesta(int jugadorIndex) {
+        Jugador jugador = jugadores.get(jugadorIndex);
+        int diferencia = apuestaMaximaActual - jugador.getApuestaRonda();
+
+        if (diferencia > 0) {
+            if (jugador.getDinero() >= diferencia) {
+                jugador.apostar(diferencia);
+                pot += diferencia;
+            } else {
+                // Caso All-In
+                int puedeApostar = jugador.getDinero();
+                jugador.apostar(puedeApostar);
+                pot += puedeApostar;
+            }
+        }
+    }
+
+
 }

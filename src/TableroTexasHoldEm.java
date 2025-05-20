@@ -9,7 +9,7 @@ public class TableroTexasHoldEm extends JPanel {
     private int cantidadJugadores;
     private Image backgroundImage;
 
-    private JLabel lblTitulo, lblEtapa, lblTurno, lblDinero;
+    private JLabel lblTitulo, lblEtapa, lblTurno, lblDinero, lblPot, lblApuestaMaxima;
     private JPanel panelComunitarios, panelMano, panelJugadores;
 
     private JButton btnFold, btnCall, btnBet, btnRaise, btnCheck;
@@ -29,6 +29,7 @@ public class TableroTexasHoldEm extends JPanel {
 
         juego = new TexasHoldEm(cantidadJugadores, 1000, 50, nombresJugadores);
         juego.iniciarJuego(cantidadJugadores);
+
 
         backgroundImage = new ImageIcon("src/Imagenes/mesa.png").getImage();
 
@@ -93,7 +94,14 @@ public class TableroTexasHoldEm extends JPanel {
         // Botón "Call"
         btnCall = new JButton("Call");
         btnCall.setBounds(790, 910, 140, 50);
-        btnCall.addActionListener(e -> ejecutarAccion("call"));
+        btnCall.addActionListener(e -> {
+            int diferencia = juego.getApuestaMaximaActual() - juego.getJugadorActual().getApuestaRonda();
+            if (diferencia > 0) {
+                ejecutarAccion("call");
+            } else {
+                ejecutarAccion("check");
+            }
+        });
         add(btnCall);
 
         // Botón "Bet"
@@ -129,20 +137,68 @@ public class TableroTexasHoldEm extends JPanel {
         btnCheck.setBounds(490, 910, 140, 50);
         btnCheck.addActionListener(e -> ejecutarAccion("check"));
         add(btnCheck);
+
+        lblPot = new JLabel("Pot: $0", SwingConstants.CENTER);
+        lblPot.setFont(new Font("Arial", Font.BOLD, 30));
+        lblPot.setForeground(Color.WHITE);
+        lblPot.setBounds(700, 200, 500, 40);
+        add(lblPot);
+
+        lblApuestaMaxima = new JLabel("Apuesta Máxima: $0", SwingConstants.CENTER);
+        lblApuestaMaxima.setFont(new Font("Arial", Font.BOLD, 20));
+        lblApuestaMaxima.setForeground(Color.WHITE);
+        lblApuestaMaxima.setBounds(700, 250, 500, 30); // Debajo del pot
+        add(lblApuestaMaxima);
     }
 
     private void actualizarPanelJugadores() {
         panelJugadores.removeAll();
 
-        for (Jugador jugador : juego.getJugadores()) {
-            JLabel lblJugador = new JLabel(jugador.toString());
-            lblJugador.setFont(new Font("Arial", Font.BOLD, 20));
-            lblJugador.setForeground(Color.WHITE);
+        // Título
+        JLabel lblTitulo = new JLabel("Jugadores:");
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 24));
+        lblTitulo.setForeground(Color.WHITE);
+        panelJugadores.add(lblTitulo);
+        panelJugadores.add(Box.createRigidArea(new Dimension(0, 20)));
 
-            // Resaltar al jugador actual
+        // Información de dealer y ciegas
+        if(juego.getJugadores().size() > 0) {
+            JLabel lblDealer = new JLabel("Dealer: " + juego.getDealer().getNombre());
+            lblDealer.setFont(new Font("Arial", Font.BOLD, 20));
+            lblDealer.setForeground(Color.CYAN);
+            panelJugadores.add(lblDealer);
+
+            JLabel lblSmallBlind = new JLabel("SB: " + juego.getSmallBlind().getNombre() + " ($" + juego.getCiega() + ")");
+            lblSmallBlind.setFont(new Font("Arial", Font.PLAIN, 18));
+            lblSmallBlind.setForeground(Color.WHITE);
+            panelJugadores.add(lblSmallBlind);
+
+            JLabel lblBigBlind = new JLabel("BB: " + juego.getBigBlind().getNombre() + " ($" + juego.getCiegaGrande() + ")");
+            lblBigBlind.setFont(new Font("Arial", Font.PLAIN, 18));
+            lblBigBlind.setForeground(Color.WHITE);
+            panelJugadores.add(lblBigBlind);
+        }
+
+        panelJugadores.add(Box.createRigidArea(new Dimension(0, 20)));
+
+        // Lista de jugadores con su información actualizada
+        for (Jugador jugador : juego.getJugadores()) {
+            String estado = jugador.estaActivo() ? (jugador.isAllIn() ? " [ALL-IN]" : "") : " [FOLD]";
+            String info = String.format("%s: $%d (Apuesta: $%d)%s",
+                    jugador.getNombre(),
+                    jugador.getDinero(),
+                    jugador.getApuestaRonda(),
+                    estado);
+
+            JLabel lblJugador = new JLabel(info);
+            lblJugador.setFont(new Font("Arial", Font.BOLD, 20));
+
+            // Resaltar jugador actual
             if (jugador == juego.getJugadorActual()) {
                 lblJugador.setForeground(Color.YELLOW);
-                lblJugador.setFont(new Font("Arial", Font.BOLD, 24));
+                lblJugador.setFont(lblJugador.getFont().deriveFont(Font.BOLD, 22));
+            } else {
+                lblJugador.setForeground(Color.WHITE);
             }
 
             panelJugadores.add(lblJugador);
@@ -152,37 +208,55 @@ public class TableroTexasHoldEm extends JPanel {
         panelJugadores.revalidate();
         panelJugadores.repaint();
     }
-
     // Ejecuta acciones que no requieren monto: "fold", "call" y ahora "check"
     private void ejecutarAccion(String accion) {
         Jugador jugadorActual = juego.getJugadorActual();
         switch (accion) {
             case "fold":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " se retira.");
                 jugadorActual.retirarse();
                 break;
             case "call":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " iguala la apuesta.");
-                juego.igualar(juego.getTurnoActual(), juego.cantidadApuestaRonda());
+                juego.igualarApuesta(juego.getTurnoActual());
+                JOptionPane.showMessageDialog(this,
+                        jugadorActual.getNombre() + " iguala la apuesta de $" +
+                                juego.getApuestaMaximaActual());
                 break;
             case "check":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " hace check.");
+                if (juego.isApuestaEnRonda()) {
+                    JOptionPane.showMessageDialog(this,
+                            "No puedes hacer check, hay una apuesta activa");
+                    return;
+                }
+                JOptionPane.showMessageDialog(this,
+                        jugadorActual.getNombre() + " hace check");
                 break;
         }
         avanzarTurno();
     }
 
-    // Ejecuta acciones que requieren monto: "bet" y "raise"
     private void ejecutarAccion(String accion, int monto) {
         Jugador jugadorActual = juego.getJugadorActual();
+        int apuestaActualJugador = jugadorActual.getApuestaRonda();
+
         switch (accion) {
             case "bet":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " apuesta $" + monto + ".");
-                juego.apostar(juego.getTurnoActual(), monto);
+                // Establece nueva apuesta máxima
+                juego.setApuestaMaximaActual(monto);
+                // Calcula diferencia real a apostar (resta lo ya apostado)
+                int diferenciaBet = monto - apuestaActualJugador;
+                jugadorActual.apostar(diferenciaBet);
+                juego.agregarAlPot(diferenciaBet);
+                juego.setApuestaEnRonda(true);
                 break;
+
             case "raise":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " sube la apuesta a $" + monto + ".");
-                juego.subir(juego.getTurnoActual(), monto);
+                // Calcula el nuevo total (apuesta anterior + raise)
+                int nuevoTotal = apuestaActualJugador + monto;
+                juego.setApuestaMaximaActual(nuevoTotal);
+                // El monto ya es la diferencia a subir
+                jugadorActual.apostar(monto);
+                juego.agregarAlPot(monto);
+                juego.setApuestaEnRonda(true);
                 break;
         }
         avanzarTurno();
@@ -200,6 +274,9 @@ public class TableroTexasHoldEm extends JPanel {
         lblEtapa.setText("Etapa: " + juego.getNombreEtapa());
         lblTurno.setText("Turno: " + jugadorActual.getNombre());
         lblDinero.setText("Dinero: $" + jugadorActual.getDinero());
+        lblPot.setText("Pot: $" + juego.getPot());
+        lblApuestaMaxima.setText("Apuesta Máxima: $" + juego.getApuestaMaximaActual());
+        btnCheck.setEnabled(!juego.isApuestaEnRonda());
 
         // Actualiza el panel de cartas comunitarias.
         panelComunitarios.removeAll();
@@ -246,4 +323,5 @@ public class TableroTexasHoldEm extends JPanel {
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
+
 }

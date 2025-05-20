@@ -9,6 +9,7 @@ public class Jugador {
     private Mano mano;
     private boolean activo;
     private boolean allIn;
+    private int apuestaRonda;
 
     public Jugador(String nombre, int dineroInicial) {
         this.nombre = nombre;
@@ -24,6 +25,7 @@ public class Jugador {
             allIn = true;
         }
         this.dinero -= cantidad;
+        this.apuestaRonda += cantidad; // Añade esta línea
         if (dinero == 0) {
             allIn = true;
         }
@@ -75,5 +77,12 @@ public class Jugador {
             sb.append(" [RETIRADO]");
         }
         return sb.toString();
+    }
+    public int getApuestaRonda() {
+        return apuestaRonda;
+    }
+
+    public void resetearApuestaRonda() {  // Sin parámetros
+        this.apuestaRonda = 0;
     }
 }

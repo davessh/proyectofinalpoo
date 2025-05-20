@@ -21,8 +21,9 @@ public class TableroFiveCardDraw extends JPanel {
 
     public TableroFiveCardDraw(int cantidadJugadores) {
         this.cantidadJugadores = cantidadJugadores;
+        String[] nombreJugadores = new String[cantidadJugadores];
         // Instanciar la lógica del juego (dinero inicial 1000, anteInicial 50)
-        juego = new FiveCardDraw(cantidadJugadores, 1000, 50);
+        juego = new FiveCardDraw(cantidadJugadores, 1000, 50, nombreJugadores);
         juego.iniciarJuego(cantidadJugadores);
 
         // Cargar imagen de fondo. Verifica que la ruta sea correcta.
