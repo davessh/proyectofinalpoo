@@ -1,228 +1,261 @@
-import java.util.*;
-import java.util.stream.Collectors;
+    import java.util.*;
+    import java.util.stream.Collectors;
 
-public class TexasHoldEm extends JuegoPoker {
-    private List<Carta> cartasComunitarias;
-    private int etapaActual; // 0 = Pre-Flop, 1 = Flop, 2 = Turn, 3 = River
-    private int apuestaMinima;
-    private int ciega;
-    private int ciegaGrande;
-    private List<Jugador> jugadores;
+    public class TexasHoldEm extends JuegoPoker {
+        private List<Carta> cartasComunitarias;
+        private int etapaActual; // 0 = Pre-Flop, 1 = Flop, 2 = Turn, 3 = River
+        private int apuestaMinima;
+        private int ciega;
+        private int ciegaGrande;
+        private List<Jugador> jugadores;
+        private boolean rondaDeApuestasTerminada;
 
-    public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String[] nombresJugadores) {
-        super(numeroDeJugadores, dineroInicial, new Baraja());
-        this.cartasComunitarias = new ArrayList<>();
-        this.etapaActual = 0;
-        this.ciega = ciegaPequena;
-        this.ciegaGrande = ciegaPequena * 2;
-        this.apuestaMinima = ciegaGrande;
-        jugadores = new ArrayList<>();
-        for (int i = 0; i < numeroDeJugadores; i++) {
-            jugadores.add(new Jugador(nombresJugadores[i], dineroInicial));
+        public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String[] nombresJugadores) {
+            super(numeroDeJugadores, dineroInicial, new Baraja());
+            this.cartasComunitarias = new ArrayList<>();
+            this.etapaActual = 0;
+            this.ciega = ciegaPequena;
+            this.ciegaGrande = ciegaPequena * 2;
+            this.apuestaMinima = ciegaGrande;
+            jugadores = new ArrayList<>();
+            for (int i = 0; i < numeroDeJugadores; i++) {
+                jugadores.add(new Jugador(nombresJugadores[i], dineroInicial));
+            }
+            this.rondaDeApuestasTerminada = false;
         }
-    }
 
-    @Override
-    public void iniciarJuego(int numeroDeJugadores) {
-        baraja.barajar();
-        repartirCartas();
+        @Override
+        public void iniciarJuego(int numeroDeJugadores) {
+            baraja.barajar();
+            repartirCartas();
 
-        // El turno inicial ya se definió en el constructor, pero se puede redefinir aquí si se requiere.
-        turnoInicial = determinarTurnoInicial();
-        // La small blind
-        int posicionCiegaPequena = turnoInicial;
-        apostar(posicionCiegaPequena, ciega);
+            // El turno inicial ya se definió en el constructor, pero se puede redefinir aquí si se requiere.
+            turnoInicial = determinarTurnoInicial();
+            // La small blind
+            int posicionCiegaPequena = turnoInicial;
+            apostar(posicionCiegaPequena, ciega);
 
-        // La big blind
-        int posicionCiegaGrande = (turnoInicial + 1) % numeroDeJugadores;
-        apostar(posicionCiegaGrande, ciegaGrande);
+            // La big blind
+            int posicionCiegaGrande = (turnoInicial + 1) % numeroDeJugadores;
+            apostar(posicionCiegaGrande, ciegaGrande);
 
-        // Primer turno tras las blinds
-        turnoActual = (posicionCiegaGrande + 1) % numeroDeJugadores;
-    }
+            // Primer turno tras las blinds
+            turnoActual = (posicionCiegaGrande + 1) % numeroDeJugadores;
+        }
 
-    @Override
-    public void repartirCartas() {
-        // Repartir 2 cartas a cada jugador (cartas privadas)
-        for (int i = 0; i < 2; i++) {
-            for (Jugador jugador : jugadores) {
-                Carta carta = baraja.repartirUna();
-                if (jugador.getMano() == null) {
-                    jugador.setMano(new Mano(List.of(carta)));
-                } else {
-                    jugador.getMano().agregarCarta(carta);
+        @Override
+        public void repartirCartas() {
+            // Repartir 2 cartas a cada jugador (cartas privadas)
+            for (int i = 0; i < 2; i++) {
+                for (Jugador jugador : jugadores) {
+                    Carta carta = baraja.repartirUna();
+                    if (jugador.getMano() == null) {
+                        jugador.setMano(new Mano(List.of(carta)));
+                    } else {
+                        jugador.getMano().agregarCarta(carta);
+                    }
                 }
             }
         }
-    }
 
-    @Override
-    public void jugarRonda() {
-        if (rondaTerminada()) {
-            determinarGanador();
-            return;
-        }
-        switch (etapaActual) {
-            case 0: // Pre-Flop a Flop
-                generarFlop();
-                break;
-            case 1: // Flop a Turn
-                generarTurn();
-                break;
-            case 2: // Turn a River
-                generarRiver();
-                break;
-            case 3: // Determinar ganador
+        @Override
+        public void jugarRonda() {
+            if (etapaActual > 3) {
                 determinarGanador();
-                break;
-        }
-        etapaActual++;
-        if (etapaActual < 4) {
-            reiniciarApuestasRonda();
-        }
-    }
+                return;
+            }
 
-    private void generarFlop() {
-        // Quemar la carta superior
-        baraja.repartirUna();
-        // Repartir 3 cartas comunitarias
-        for (int i = 0; i < 3; i++) {
+            // Verificar si la ronda de apuestas ha terminado
+            if (rondaDeApuestasTerminada) {
+                avanzarEtapa();
+                rondaDeApuestasTerminada = false;
+                reiniciarApuestasRonda();
+                return;
+            }
+
+            // Si no es el Pre-Flop, mostrar las cartas comunitarias
+            if (etapaActual > 0) {
+                switch (etapaActual) {
+                    case 1: // Flop
+                        if (cartasComunitarias.isEmpty()) generarFlop();
+                        break;
+                    case 2: // Turn
+                        if (cartasComunitarias.size() < 4) generarTurn();
+                        break;
+                    case 3: // River
+                        if (cartasComunitarias.size() < 5) generarRiver();
+                        break;
+                }
+            }
+        }
+
+        private void avanzarEtapa() {
+            etapaActual++;
+            if (etapaActual <= 3) {
+                //debug
+                System.out.println("Avanzando a etapa: " + getNombreEtapa());
+            }
+        }
+        public void terminarRondaDeApuestas() {
+            this.rondaDeApuestasTerminada = true;
+        }
+
+        public boolean isRondaDeApuestasTerminada() {
+            return rondaDeApuestasTerminada;
+        }
+        public void siguienteTurno() {
+            do {
+                turnoActual = (turnoActual + 1) % numeroDeJugadores;
+            } while (!jugadores.get(turnoActual).estaActivo() || jugadores.get(turnoActual).getDinero() <= 0);
+
+            // Verificar si hemos completado una ronda completa de apuestas
+            if (turnoActual == turnoInicial) {
+                terminarRondaDeApuestas();
+            }
+        }
+        private void generarFlop() {
+            baraja.repartirUna(); // Quemar carta
+            for (int i = 0; i < 3; i++) {
+                Carta carta = baraja.repartirUna();
+                if (carta != null) {
+                    cartasComunitarias.add(carta);
+                }
+            }
+            System.out.println("Flop generado: " + cartasComunitarias); // Debug
+        }
+
+        private void generarTurn() {
+            // Quemar una carta
+            baraja.repartirUna();
             cartasComunitarias.add(baraja.repartirUna());
         }
-    }
 
-    private void generarTurn() {
-        // Quemar una carta
-        baraja.repartirUna();
-        cartasComunitarias.add(baraja.repartirUna());
-    }
-
-    private void generarRiver() {
-        // Quemar una carta
-        baraja.repartirUna();
-        // Repartir la quinta carta comunitaria
-        cartasComunitarias.add(baraja.repartirUna());
-    }
-
-    private void reiniciarApuestasRonda() {
-        // Para reiniciar las apuestas después de cada ronda, se resetea el turno al inicial
-        turnoActual = turnoInicial;
-        // Se puede agregar código para resetear las apuestas de cada jugador sin afectar el bote total
-    }
-
-    @Override
-    public int determinarGanador() {
-        // Se cuenta cuántos jugadores activos quedan
-        List<Jugador> jugadoresActivos = jugadores.stream()
-                .filter(Jugador::estaActivo)
-                .collect(Collectors.toList());
-
-        // Si solo queda uno, ese es el ganador
-        if (jugadoresActivos.size() == 1) {
-            Jugador ganador = jugadoresActivos.get(0);
-            ganador.recibir(cantidadApuestaRonda);
-            return jugadores.indexOf(ganador);
+        private void generarRiver() {
+            // Quemar una carta
+            baraja.repartirUna();
+            // Repartir la quinta carta comunitaria
+            cartasComunitarias.add(baraja.repartirUna());
         }
 
-        // Se evalúa la mejor mano combinando cartas privadas y comunitarias
-        Jugador ganador = null;
-        Mano mejorMano = null;
+        private void reiniciarApuestasRonda() {
+            // Para reiniciar las apuestas después de cada ronda, se resetea el turno al inicial
+            turnoActual = turnoInicial;
+            // Se puede agregar código para resetear las apuestas de cada jugador sin afectar el bote total
+        }
 
-        for (Jugador jugador : jugadoresActivos) {
-            List<Carta> todasLasCartas = new ArrayList<>(jugador.getMano().getCartas());
-            todasLasCartas.addAll(cartasComunitarias);
+        @Override
+        public int determinarGanador() {
+            // Se cuenta cuántos jugadores activos quedan
+            List<Jugador> jugadoresActivos = jugadores.stream()
+                    .filter(Jugador::estaActivo)
+                    .collect(Collectors.toList());
 
-            Mano mejorCombinacion = encontrarMejorCombinacion(todasLasCartas);
-            if (mejorMano == null || mejorCombinacion.compareTo(mejorMano) > 0) {
-                mejorMano = mejorCombinacion;
-                ganador = jugador;
+            // Si solo queda uno, ese es el ganador
+            if (jugadoresActivos.size() == 1) {
+                Jugador ganador = jugadoresActivos.get(0);
+                ganador.recibir(cantidadApuestaRonda);
+                return jugadores.indexOf(ganador);
+            }
+
+            // Se evalúa la mejor mano combinando cartas privadas y comunitarias
+            Jugador ganador = null;
+            Mano mejorMano = null;
+
+            for (Jugador jugador : jugadoresActivos) {
+                List<Carta> todasLasCartas = new ArrayList<>(jugador.getMano().getCartas());
+                todasLasCartas.addAll(cartasComunitarias);
+
+                Mano mejorCombinacion = encontrarMejorCombinacion(todasLasCartas);
+                if (mejorMano == null || mejorCombinacion.compareTo(mejorMano) > 0) {
+                    mejorMano = mejorCombinacion;
+                    ganador = jugador;
+                }
+            }
+            if (ganador != null) {
+                ganador.recibir(cantidadApuestaRonda);
+                return jugadores.indexOf(ganador);
+            }
+            return -1;  // Empate o error
+        }
+
+        private Mano encontrarMejorCombinacion(List<Carta> cartas) {
+            List<List<Carta>> combinaciones = generarCombinaciones(cartas, 5);
+            Mano mejorMano = null;
+            for (List<Carta> combinacion : combinaciones) {
+                Mano manoActual = new Mano(combinacion);
+                if (mejorMano == null || manoActual.compareTo(mejorMano) > 0) {
+                    mejorMano = manoActual;
+                }
+            }
+            return mejorMano;
+        }
+
+        private List<List<Carta>> generarCombinaciones(List<Carta> cartas, int k) {
+            List<List<Carta>> resultado = new ArrayList<>();
+            generarCombinacionesAux(cartas, k, 0, new ArrayList<>(), resultado);
+            return resultado;
+        }
+
+        private void generarCombinacionesAux(List<Carta> cartas, int k, int inicio,
+                                             List<Carta> actual, List<List<Carta>> resultado) {
+            if (actual.size() == k) {
+                resultado.add(new ArrayList<>(actual));
+                return;
+            }
+            for (int i = inicio; i < cartas.size(); i++) {
+                actual.add(cartas.get(i));
+                generarCombinacionesAux(cartas, k, i + 1, actual, resultado);
+                actual.remove(actual.size() - 1);
             }
         }
-        if (ganador != null) {
-            ganador.recibir(cantidadApuestaRonda);
-            return jugadores.indexOf(ganador);
-        }
-        return -1;  // Empate o error
-    }
 
-    private Mano encontrarMejorCombinacion(List<Carta> cartas) {
-        List<List<Carta>> combinaciones = generarCombinaciones(cartas, 5);
-        Mano mejorMano = null;
-        for (List<Carta> combinacion : combinaciones) {
-            Mano manoActual = new Mano(combinacion);
-            if (mejorMano == null || manoActual.compareTo(mejorMano) > 0) {
-                mejorMano = manoActual;
+        @Override
+        public void mostrarMano() {
+            System.out.println("Cartas comunitarias: ");
+            for (Carta carta : cartasComunitarias) {
+                System.out.print(carta + " ");
             }
+            System.out.println();
+            System.out.println("Manos de los jugadores:");
+            mostrarManos();
         }
-        return mejorMano;
-    }
 
-    private List<List<Carta>> generarCombinaciones(List<Carta> cartas, int k) {
-        List<List<Carta>> resultado = new ArrayList<>();
-        generarCombinacionesAux(cartas, k, 0, new ArrayList<>(), resultado);
-        return resultado;
-    }
-
-    private void generarCombinacionesAux(List<Carta> cartas, int k, int inicio,
-                                         List<Carta> actual, List<List<Carta>> resultado) {
-        if (actual.size() == k) {
-            resultado.add(new ArrayList<>(actual));
-            return;
+        @Override
+        public int determinarTurnoInicial() {
+            // Cambio de dealer aleatorio
+            return new Random().nextInt(numeroDeJugadores);
         }
-        for (int i = inicio; i < cartas.size(); i++) {
-            actual.add(cartas.get(i));
-            generarCombinacionesAux(cartas, k, i + 1, actual, resultado);
-            actual.remove(actual.size() - 1);
+
+        // Métodos públicos para gestionar y consultar el turno actual
+        public int getTurnoActual() {
+            return turnoActual;
+        }
+
+        public void setTurnoActual(int nuevoTurno) {
+            turnoActual = nuevoTurno;
+        }
+
+
+        @Override
+        public Jugador getJugadorActual() {
+            return jugadores.get(turnoActual);
+        }
+
+        public List<Carta> getCartasComunitarias() {
+            return cartasComunitarias;
+        }
+
+        public int getEtapaActual() {
+            return etapaActual;
+        }
+
+        public String getNombreEtapa() {
+            return switch (etapaActual) {
+                case 0 -> "Pre-Flop";
+                case 1 -> "Flop";
+                case 2 -> "Turn";
+                case 3 -> "River";
+                default -> "Fin de juego";
+            };
         }
     }
-
-    @Override
-    public void mostrarMano() {
-        System.out.println("Cartas comunitarias: ");
-        for (Carta carta : cartasComunitarias) {
-            System.out.print(carta + " ");
-        }
-        System.out.println();
-        System.out.println("Manos de los jugadores:");
-        mostrarManos();
-    }
-
-    @Override
-    public int determinarTurnoInicial() {
-        // Cambio de dealer aleatorio
-        return new Random().nextInt(numeroDeJugadores);
-    }
-
-    // Métodos públicos para gestionar y consultar el turno actual
-    public int getTurnoActual() {
-        return turnoActual;
-    }
-
-    public void setTurnoActual(int nuevoTurno) {
-        turnoActual = nuevoTurno;
-    }
-
-
-    @Override
-    public Jugador getJugadorActual() {
-        return jugadores.get(turnoActual);
-    }
-
-    public List<Carta> getCartasComunitarias() {
-        return cartasComunitarias;
-    }
-
-    public int getEtapaActual() {
-        return etapaActual;
-    }
-
-    public String getNombreEtapa() {
-        return switch (etapaActual) {
-            case 0 -> "Pre-Flop";
-            case 1 -> "Flop";
-            case 2 -> "Turn";
-            case 3 -> "River";
-            default -> "Fin de juego";
-        };
-    }
-}

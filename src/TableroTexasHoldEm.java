@@ -158,17 +158,23 @@ public class TableroTexasHoldEm extends JPanel {
         Jugador jugadorActual = juego.getJugadorActual();
         switch (accion) {
             case "fold":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " se retira.");
                 jugadorActual.retirarse();
+                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " se retira.");
                 break;
             case "call":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " iguala la apuesta.");
                 juego.igualar(juego.getTurnoActual(), juego.cantidadApuestaRonda());
+                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " iguala la apuesta.");
                 break;
             case "check":
                 JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " hace check.");
                 break;
         }
+
+        // Verificar si quedan jugadores activos
+        if (juego.getJugadores().stream().filter(Jugador::estaActivo).count() <= 1) {
+            juego.terminarRondaDeApuestas();
+        }
+
         avanzarTurno();
     }
 
@@ -177,12 +183,12 @@ public class TableroTexasHoldEm extends JPanel {
         Jugador jugadorActual = juego.getJugadorActual();
         switch (accion) {
             case "bet":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " apuesta $" + monto + ".");
                 juego.apostar(juego.getTurnoActual(), monto);
+                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " apuesta $" + monto + ".");
                 break;
             case "raise":
-                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " sube la apuesta a $" + monto + ".");
                 juego.subir(juego.getTurnoActual(), monto);
+                JOptionPane.showMessageDialog(this, jugadorActual.getNombre() + " sube la apuesta a $" + monto + ".");
                 break;
         }
         avanzarTurno();
@@ -190,9 +196,25 @@ public class TableroTexasHoldEm extends JPanel {
 
     private void avanzarTurno() {
         juego.siguienteTurno();
-        juego.jugarRonda();
+
+        // Verificar si la ronda de apuestas ha terminado
+        if (juego.isRondaDeApuestasTerminada()) {
+            juego.jugarRonda(); // Esto avanzará a la siguiente etapa
+        }
+
         actualizarPantalla();
+
+        // Verificar si el juego ha terminado
+        if (juego.getEtapaActual() > 3) {
+            int ganadorIndex = juego.determinarGanador();
+            Jugador ganador = juego.getJugadores().get(ganadorIndex);
+            JOptionPane.showMessageDialog(this,
+                    "¡Juego terminado! Ganador: " + ganador.getNombre() +
+                            "\nPremio: $" + juego.cantidadApuestaRonda());
+        }
     }
+
+
 
     private void actualizarPantalla() {
         Jugador jugadorActual = juego.getJugadorActual();
@@ -229,7 +251,7 @@ public class TableroTexasHoldEm extends JPanel {
         String paloStr = carta.getPalo().name().toLowerCase();
         String nombreCarta = valorStr + "_" + paloStr;
 
-        String ruta = "C:\\Users\\GF76\\IdeaProjects\\proyectofinalpoo2\\Baraja\\" + nombreCarta + ".png";
+        String ruta = "C:\\Users\\usuario\\IdeaProjects\\proyectofinalpoo2\\Baraja\\" + nombreCarta + ".png";
 
         ImageIcon icon = new ImageIcon(ruta);
         if (icon.getIconWidth() == -1) {
