@@ -10,12 +10,14 @@ public class PokerGui extends JFrame {
     JPanel mainPanel;
     Clip musicaFondo;
 
+    int cantidadJugadores = 2;
+    String modoSeleccionado = ""; // Nueva variable para guardar el modo elegido
+
     public PokerGui() {
-        setTitle("CimaLuck");
+        setTitle("Juego con Interfaz");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(1920, 1080);
-        setLocationRelativeTo(null);
-
+        setLocationRelativeTo(null );
 
         cardLayout = new CardLayout();
         mainPanel = new JPanel(cardLayout);
@@ -25,11 +27,10 @@ public class PokerGui extends JFrame {
         mainPanel.add(crearSeleccionModo(), "Modo");
         mainPanel.add(crearSeleccionJugadores(), "SeleccionJugadores");
 
-
         setContentPane(mainPanel);
         setVisible(true);
 
-        reproducirMusica("C:\\Users\\V16\\Downloads\\CancionCasino.wav");
+        reproducirMusica("C:\\Users\\V16\\Downloads\\CancionCasino.wa");
     }
 
     private JPanel crearVentanaInicial() {
@@ -41,7 +42,6 @@ public class PokerGui extends JFrame {
                 super.paintComponent(g);
                 g.drawImage(fondo, 0, 0, getWidth(), getHeight(), this);
             }
-
         };
         panel.setLayout(null);
 
@@ -120,6 +120,7 @@ public class PokerGui extends JFrame {
         panel.add(boton1);
         boton1.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            modoSeleccionado = "TexasHoldEm";
             cardLayout.show(mainPanel, "SeleccionJugadores");
         });
 
@@ -128,17 +129,17 @@ public class PokerGui extends JFrame {
         panel.add(boton2);
         boton2.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
+            modoSeleccionado = "FiveCardDraw";
             cardLayout.show(mainPanel, "SeleccionJugadores");
         });
 
         return panel;
     }
 
-    int cantidadJugadores = 2;
-
     private JPanel crearSeleccionJugadores() {
         JPanel panel = new JPanel() {
             Image fondo = new ImageIcon("C:\\Users\\V16\\Downloads\\FondoJugadores.jpg").getImage();
+
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -193,23 +194,20 @@ public class PokerGui extends JFrame {
         botonContinuar.addActionListener(e -> {
             reproducirSonido("C:\\Users\\V16\\Downloads\\SonidoBotton.wav");
 
-            // Crear la instancia del Tablero para Texas Hold'em pasando la cantidad de jugadores seleccionada
-            TableroTexasHoldEm tableroTexas = new TableroTexasHoldEm(cantidadJugadores);
-
-            // Agregar el panel "Juego" al CardLayout con una etiqueta única
-            mainPanel.add(tableroTexas, "Juego");
-
-            // Muestra el nuevo panel utilizando CardLayout
-            cardLayout.show(mainPanel, "Juego");
+            if (modoSeleccionado.equals("TexasHoldEm")) {
+                TableroTexasHoldEm tableroTexas = new TableroTexasHoldEm(cantidadJugadores);
+                mainPanel.add(tableroTexas, "JuegoTexas");
+                cardLayout.show(mainPanel, "JuegoTexas");
+            } else if (modoSeleccionado.equals("FiveCardDraw")) {
+                TableroFiveCardDraw tableroFive = new TableroFiveCardDraw(cantidadJugadores);
+                mainPanel.add(tableroFive, "JuegoFive");
+                cardLayout.show(mainPanel, "JuegoFive");
+            }
         });
         panel.add(botonContinuar);
 
-
         return panel;
     }
-
-
-
 
     private JButton crearBotonEstilizado(String texto) {
         JButton boton = new JButton(texto);
@@ -292,4 +290,5 @@ public class PokerGui extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(PokerGui::new);
-    }}
+    }
+}
