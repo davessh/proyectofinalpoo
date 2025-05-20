@@ -15,9 +15,11 @@ public class TexasHoldEm extends JuegoPoker {
     private int pot;
     private boolean apuestaEnRonda;
     private int apuestaMaximaActual;// Para controlar si ya se pusieron las ciegas
+    private boolean rondaPreFlopCompletada;
+    private int ultimoApostadorIndex;
 
     public TexasHoldEm(int numeroDeJugadores, int dineroInicial, int ciegaPequena, String[] nombresJugadores) {
-        super(numeroDeJugadores, dineroInicial, new Baraja(),nombresJugadores);
+        super(numeroDeJugadores, dineroInicial, new Baraja(), nombresJugadores);
         this.cartasComunitarias = new ArrayList<>();
         this.etapaActual = 0;
         this.ciega = ciegaPequena;
@@ -26,16 +28,16 @@ public class TexasHoldEm extends JuegoPoker {
         jugadores = new ArrayList<>();
         this.pot = 0; // Inicializar el pot en 0
         this.apuestaEnRonda = false; // Nadie ha apostado al inicio
-        for (int i = 0; i < numeroDeJugadores; i++) {
-            jugadores.add(new Jugador(nombresJugadores[i], dineroInicial));
-        }
         this.dealerIndex = -1; // Inicialmente no hay dealer
         this.ciegasColocadas = false;
         this.apuestaMaximaActual = 0;
+        this.jugadores = super.getJugadores();
     }
 
     @Override
     public void iniciarJuego(int numeroDeJugadores) {
+        this.rondaPreFlopCompletada = false;
+        this.ultimoApostadorIndex = bigBlindIndex;
         baraja.barajar();
         repartirCartas();
         pot = 0;
@@ -43,6 +45,7 @@ public class TexasHoldEm extends JuegoPoker {
         apuestaEnRonda = true;
         apuestaMinima = ciegaGrande;
         apuestaMaximaActual = ciegaGrande;
+
     }
 
     @Override
@@ -62,12 +65,11 @@ public class TexasHoldEm extends JuegoPoker {
 
     @Override
     public void jugarRonda() {
-        if (rondaTerminada()) {
-            determinarGanador();
-            // Preparar para la siguiente ronda
-            ciegasColocadas = false;
+        if (!rondaPreFlopCompletada) {
+            manejarRondaApuestas();
             return;
         }
+
         switch (etapaActual) {
             case 0: // Pre-Flop a Flop
                 generarFlop();
@@ -120,49 +122,69 @@ public class TexasHoldEm extends JuegoPoker {
 
     @Override
     public int determinarGanador() {
-        // Se cuenta cuántos jugadores activos quedan
-            List<Jugador> jugadoresActivos = jugadores.stream()
-                    .filter(Jugador::estaActivo)
-                    .collect(Collectors.toList());
+        List<Jugador> jugadoresActivos = jugadores.stream()
+                .filter(Jugador::estaActivo)
+                .collect(Collectors.toList());
 
-            if (jugadoresActivos.size() == 1) {
-                Jugador ganador = jugadoresActivos.get(0);
-                ganador.recibir(pot); // Entregar el pot al ganador
-                pot = 0; // Resetear el pot
-                return jugadores.indexOf(ganador);
-            }
+        if (jugadoresActivos.size() == 1) {
+            Jugador ganador = jugadoresActivos.get(0);
+            ganador.recibir(pot); // Transfiere el pot al ganador
+            int indiceGanador = jugadores.indexOf(ganador);
+            pot = getPot(); // Reinicia el pot después de transferirlo
+            return indiceGanador;
+        }
 
-        // Se evalúa la mejor mano combinando cartas privadas y comunitarias
-        Jugador ganador = null;
-        Mano mejorMano = null;
-
+        // Evaluar la mejor mano para cada jugador activo
+        Map<Jugador, Mano> mejoresManos = new HashMap<>();
         for (Jugador jugador : jugadoresActivos) {
             List<Carta> todasLasCartas = new ArrayList<>(jugador.getMano().getCartas());
             todasLasCartas.addAll(cartasComunitarias);
+            Mano mejorMano = encontrarMejorCombinacion(todasLasCartas);
+            mejoresManos.put(jugador, mejorMano);
+        }
 
-            Mano mejorCombinacion = encontrarMejorCombinacion(todasLasCartas);
-            if (mejorMano == null || mejorCombinacion.compareTo(mejorMano) > 0) {
-                mejorMano = mejorCombinacion;
-                ganador = jugador;
+        // Encontrar el jugador(es) con la mejor mano
+        List<Jugador> ganadores = new ArrayList<>();
+        Mano mejorManoGlobal = null;
+
+        for (Map.Entry<Jugador, Mano> entry : mejoresManos.entrySet()) {
+            if (mejorManoGlobal == null || entry.getValue().compareTo(mejorManoGlobal) > 0) {
+                mejorManoGlobal = entry.getValue();
+                ganadores.clear();
+                ganadores.add(entry.getKey());
+            } else if (entry.getValue().compareTo(mejorManoGlobal) == 0) {
+                ganadores.add(entry.getKey());
             }
         }
-        if (ganador != null) {
-            ganador.recibir(pot);
-            pot = 0;
-            return jugadores.indexOf(ganador);
-        }
-        return -1;  // Empate o error
-    }
 
+        // Distribuir el pot entre los ganadores
+        if (!ganadores.isEmpty()) {
+            int montoPorGanador = pot / ganadores.size();
+            for (Jugador ganador : ganadores) {
+                ganador.recibir(montoPorGanador); // Transfiere el pot dividido
+            }
+            pot = 0; // Reinicia el pot después de transferirlo
+            return jugadores.indexOf(ganadores.get(0));
+        }
+
+        return -1;
+    }
     private Mano encontrarMejorCombinacion(List<Carta> cartas) {
+        // Solo necesitamos evaluar combinaciones si hay más de 5 cartas
+        if (cartas.size() == 5) {
+            return new Mano(cartas);
+        }
+
         List<List<Carta>> combinaciones = generarCombinaciones(cartas, 5);
         Mano mejorMano = null;
+
         for (List<Carta> combinacion : combinaciones) {
             Mano manoActual = new Mano(combinacion);
             if (mejorMano == null || manoActual.compareTo(mejorMano) > 0) {
                 mejorMano = manoActual;
             }
         }
+
         return mejorMano;
     }
 
@@ -275,11 +297,11 @@ public class TexasHoldEm extends JuegoPoker {
         return bigBlindIndex;
     }
 
-    public int getCiega(){
+    public int getCiega() {
         return ciega;
     }
 
-    public int getCiegaGrande(){
+    public int getCiegaGrande() {
         return ciegaGrande;
     }
 
@@ -317,14 +339,153 @@ public class TexasHoldEm extends JuegoPoker {
             if (jugador.getDinero() >= diferencia) {
                 jugador.apostar(diferencia);
                 pot += diferencia;
+                cantidadApuestaRonda += diferencia;  // Actualizar variable de la clase padre
             } else {
                 // Caso All-In
                 int puedeApostar = jugador.getDinero();
                 jugador.apostar(puedeApostar);
                 pot += puedeApostar;
+                cantidadApuestaRonda += puedeApostar;  // Actualizar variable de la clase padre
             }
         }
     }
 
+    // Modifica el método manejarRondaApuestas()
+    public void manejarRondaApuestas() {
+        if (etapaActual != 0) {
+            rondaPreFlopCompletada = true;
+            return;
+        }
 
+        // Verificar si todos han igualado las apuestas o se han retirado
+        boolean rondaCompleta = true;
+        for (Jugador jugador : jugadores) {
+            if (jugador.estaActivo() && !jugador.isAllIn() &&
+                    jugador.getApuestaRonda() < apuestaMaximaActual) {
+                rondaCompleta = false;
+                break;
+            }
+        }
+
+        if (rondaCompleta && turnoActual == ultimoApostadorIndex) {
+            rondaPreFlopCompletada = true;
+            return;
+        }
+
+        siguienteTurno();
+    }
+
+    public boolean hayApuestasPendientes() {
+        for (Jugador jugador : jugadores) {
+            if (jugador.estaActivo() && !jugador.isAllIn() &&
+                    jugador.getApuestaRonda() < apuestaMaximaActual) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void apostar(int jugadorIndex, int cantidad) {
+        Jugador jugador = jugadores.get(jugadorIndex);
+        int diferencia = cantidad - jugador.getApuestaRonda();
+
+        if (diferencia > 0) {
+            jugador.apostar(diferencia);
+            pot += diferencia;
+            apuestaMaximaActual = cantidad;
+            ultimoApostadorIndex = jugadorIndex; // Marca quien hizo raise
+        }
+    }
+
+    public int getUltimoApostadorIndex() {
+        return ultimoApostadorIndex;
+    }
+
+    public void siguienteTurno() {
+        int jugadoresActivos = 0;
+
+        // Contar jugadores activos (no han hecho fold)
+        for (Jugador j : jugadores) {
+            if (j.estaActivo()) {
+                jugadoresActivos++;
+            }
+        }
+
+        // Si solo queda un jugador activo, terminar la ronda
+        if (jugadoresActivos <= 1) {
+            etapaActual = 4; // Fin del juego
+            return;
+        }
+
+        // Buscar el siguiente jugador válido
+        int siguienteTurno = (turnoActual + 1) % jugadores.size();
+        while (!jugadores.get(siguienteTurno).estaActivo() || jugadores.get(siguienteTurno).isAllIn()) {
+            siguienteTurno = (siguienteTurno + 1) % jugadores.size();
+
+            // Si hemos dado toda la vuelta y volvemos al jugador actual
+            if (siguienteTurno == turnoActual) {
+                break;
+            }
+        }
+
+        turnoActual = siguienteTurno;
+
+        // Verificar si todos han igualado la apuesta y si hemos completado la ronda
+        boolean todasApuestasIgualadas = true;
+        for (Jugador j : jugadores) {
+            // Solo considerar jugadores activos que no estén all-in
+            if (j.estaActivo() && !j.isAllIn() && j.getApuestaRonda() < apuestaMaximaActual) {
+                todasApuestasIgualadas = false;
+                break;
+            }
+        }
+
+        // Si todos han igualado Y hemos vuelto al último apostador o después, pasar a la siguiente etapa
+        if (todasApuestasIgualadas) {
+            // Si estamos en el ultimoApostadorIndex o lo hemos pasado en esta ronda
+            boolean rondaCompleta = false;
+
+            // La ronda está completa si:
+            // 1. No hay apuestas en la ronda actual (todos hicieron check)
+            // 2. O estamos en/después del último apostador
+            if (!apuestaEnRonda || siguienteTurno == ultimoApostadorIndex ||
+                    (turnoActual > ultimoApostadorIndex && siguienteTurno < ultimoApostadorIndex)) {
+                rondaCompleta = true;
+            }
+
+            if (rondaCompleta) {
+                avanzarEtapa();
+            }
+        }
+    }
+
+    private void avanzarEtapa() {
+        switch (etapaActual) {
+            case 0: // Pre-Flop a Flop
+                generarFlop();
+                etapaActual = 1;
+                break;
+            case 1: // Flop a Turn
+                generarTurn();
+                etapaActual = 2;
+                break;
+            case 2: // Turn a River
+                generarRiver();
+                etapaActual = 3;
+                break;
+            case 3: // River a finalizar
+                determinarGanador();
+                etapaActual = 4;
+                break;
+        }
+        reiniciarApuestasRonda();
+        // Establecer el turno inicial después del dealer
+        turnoActual = (dealerIndex + 1) % jugadores.size();
+        ultimoApostadorIndex = turnoActual; // Reset del último apostador
+
+        // Si el jugador en turnoActual no está activo o está all-in, buscar el siguiente
+        while (!jugadores.get(turnoActual).estaActivo() || jugadores.get(turnoActual).isAllIn()) {
+            turnoActual = (turnoActual + 1) % jugadores.size();
+        }
+    }
 }
